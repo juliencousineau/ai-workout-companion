@@ -27,7 +27,7 @@ class VoiceService {
         this.isListening = false;
         this.isSpeaking = false;
         this.continuousMode = false;  // When true, auto-restart listening
-        this.currentSentence = '';  // Track current sentence being spoken
+        this.recentSentences = [];  // Track recent sentences with timestamps
 
         // Callbacks
         this.onResult = null;
@@ -229,9 +229,17 @@ class VoiceService {
         const cleanText = this.cleanTextForSpeech(text);
         if (!cleanText) return;
 
-        // Track current sentence being spoken for self-hearing detection
-        this.currentSentence = cleanText.toLowerCase();
-        console.log('Set currentSentence:', this.currentSentence);
+        // Track sentence being spoken for self-hearing detection
+        const sentence = cleanText.toLowerCase();
+        this.recentSentences.push({
+            text: sentence,
+            timestamp: Date.now()
+        });
+        console.log('Added to recentSentences:', sentence);
+
+        // Clean up old sentences (older than 3 seconds)
+        const now = Date.now();
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 3000);
 
         // Cancel any current speech
         this.synthesis.cancel();
@@ -249,11 +257,6 @@ class VoiceService {
 
         utterance.onend = () => {
             this.isSpeaking = false;
-            // Clear current sentence after delay (long enough for echo to be recognized)
-            setTimeout(() => {
-                console.log('Clearing currentSentence');
-                this.currentSentence = '';
-            }, 2000);
         };
 
         utterance.onerror = (event) => {
@@ -301,23 +304,33 @@ class VoiceService {
      * Returns cleaned transcript with only user words, or empty string if all self-hearing
      */
     filterSelfHearing(transcript) {
-        if (!this.currentSentence) return transcript;
+        // Clean up old sentences first
+        const now = Date.now();
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 3000);
+
+        if (this.recentSentences.length === 0) return transcript;
 
         // Strip punctuation from words for comparison
         const stripPunctuation = (word) => word.replace(/[.,!?;:]/g, '');
 
         const heardWords = transcript.toLowerCase().split(/\s+/).map(stripPunctuation);
-        const currentWords = this.currentSentence.split(/\s+/).map(stripPunctuation);
+
+        // Collect all AI words from recent sentences
+        const allAiWords = [];
+        for (const sentence of this.recentSentences) {
+            const words = sentence.text.split(/\s+/).map(stripPunctuation);
+            allAiWords.push(...words);
+        }
 
         console.log('Filter debug:', {
             transcript,
-            currentSentence: this.currentSentence,
+            recentSentences: this.recentSentences.map(s => s.text),
             heardWords,
-            currentWords
+            allAiWords
         });
 
         // Remove AI words from heard words
-        const userWords = heardWords.filter(word => !currentWords.includes(word));
+        const userWords = heardWords.filter(word => !allAiWords.includes(word));
 
         console.log('After filtering:', { userWords });
 
