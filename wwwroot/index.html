@@ -30,18 +30,45 @@
         <main class="main-content">
             <!-- Setup Screen -->
             <div id="setupScreen" class="screen active">
-                <div class="setup-card">
-                    <div class="setup-icon">🔑</div>
-                    <h2>Connect to Hevy</h2>
-                    <p>Enter your Hevy API key to get started. You can find it at:</p>
-                    <a href="https://hevy.com/settings?developer" target="_blank" class="hevy-link">
-                        hevy.com/settings → Developer
-                    </a>
-                    <div class="input-group">
-                        <input type="password" id="apiKeyInput" placeholder="Enter your API key" class="api-input">
-                        <button id="connectBtn" class="btn btn-primary">Connect</button>
+                <!-- Provider Selection View -->
+                <div id="providerSelectView" class="setup-view">
+                    <h2 class="setup-title">Choose a Workout App</h2>
+                    <div class="provider-list">
+                        <div class="provider-card" data-provider="hevy">
+                            <div class="provider-icon">🟠</div>
+                            <div class="provider-info">
+                                <h3>Hevy</h3>
+                                <p>Sync your workouts and routines</p>
+                            </div>
+                            <span class="provider-arrow">→</span>
+                        </div>
+                        <div class="provider-card disabled" data-provider="strong">
+                            <div class="provider-icon">🔵</div>
+                            <div class="provider-info">
+                                <h3>Strong</h3>
+                                <p>Coming soon</p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="note">Requires Hevy Pro subscription</p>
+                </div>
+
+                <!-- Connection Form View -->
+                <div id="connectionFormView" class="setup-view" style="display: none;">
+                    <button id="backToProvidersBtn" class="btn-back">← Back</button>
+                    <div class="setup-card">
+                        <div class="setup-icon" id="providerFormIcon">🔑</div>
+                        <h2 id="providerFormTitle">Connect to Hevy</h2>
+                        <p id="providerFormDescription">Enter your Hevy API key to get started. You can find it at:</p>
+                        <a href="https://hevy.com/settings?developer" target="_blank" class="hevy-link"
+                            id="providerFormLink">
+                            hevy.com/settings → Developer
+                        </a>
+                        <div class="input-group">
+                            <input type="password" id="apiKeyInput" placeholder="Enter your API key" class="api-input">
+                            <button id="connectBtn" class="btn btn-primary">Connect</button>
+                        </div>
+                        <p class="note" id="providerFormNote">Requires Hevy Pro subscription</p>
+                    </div>
                 </div>
             </div>
 

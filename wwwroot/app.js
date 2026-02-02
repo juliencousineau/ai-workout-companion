@@ -26,7 +26,11 @@ class App {
             voiceBtn: document.getElementById('voiceBtn'),
             workoutSummary: document.getElementById('workoutSummary'),
             newWorkoutBtn: document.getElementById('newWorkoutBtn'),
-            disconnectBtn: document.getElementById('disconnectBtn')
+            disconnectBtn: document.getElementById('disconnectBtn'),
+            providerSelectView: document.getElementById('providerSelectView'),
+            connectionFormView: document.getElementById('connectionFormView'),
+            backToProvidersBtn: document.getElementById('backToProvidersBtn'),
+            providerCards: document.querySelectorAll('.provider-card:not(.disabled)')
         };
 
         this.selectedRoutine = null;
@@ -83,6 +87,14 @@ class App {
 
         // Disconnect button
         this.elements.disconnectBtn.addEventListener('click', () => this.handleDisconnect());
+
+        // Provider cards
+        this.elements.providerCards.forEach(card => {
+            card.addEventListener('click', () => this.selectProvider(card.dataset.provider));
+        });
+
+        // Back to providers button
+        this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
     }
 
     /**
@@ -253,7 +265,27 @@ class App {
 
         // Update status and go to setup screen
         this.updateConnectionStatus(false);
+        this.showProviderSelect();
         this.showScreen('setup');
+    }
+
+    /**
+     * Select a provider and show its connection form
+     */
+    selectProvider(providerName) {
+        providerManager.setActive(providerName);
+
+        // Show connection form
+        this.elements.providerSelectView.style.display = 'none';
+        this.elements.connectionFormView.style.display = 'flex';
+    }
+
+    /**
+     * Show provider selection view
+     */
+    showProviderSelect() {
+        this.elements.providerSelectView.style.display = 'flex';
+        this.elements.connectionFormView.style.display = 'none';
     }
 
     /**
