@@ -232,14 +232,17 @@ class VoiceService {
 
         utterance.onstart = () => {
             this.isSpeaking = true;
-            // Keep listening for interruption - don't stop recognition
+            // Stop listening while speaking to prevent hearing ourselves
+            if (this.recognition && this.isListening) {
+                this.recognition.stop();
+            }
         };
 
         utterance.onend = () => {
             this.isSpeaking = false;
             // Resume continuous listening after speaking
             if (this.continuousMode) {
-                setTimeout(() => this.startListening(), 200);
+                setTimeout(() => this.startListening(), 300);
             }
         };
 
