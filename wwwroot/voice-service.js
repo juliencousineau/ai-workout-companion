@@ -298,36 +298,20 @@ class VoiceService {
      * Check if transcript matches what AI recently said (self-hearing)
      */
     isSelfHearing(transcript) {
-        const heard = transcript.toLowerCase().split(/\\s+/);
+        if (this.recentlySaid.length === 0) return false;
 
-        // Known AI motivation phrases - if transcript contains these, likely self-hearing
-        const aiPhrases = ['beast', 'mode', 'zone', 'strong', 'start', 'great', 'awesome',
-            'nice', 'excellent', 'perfect', 'amazing', 'crushing', 'fire',
-            'halfway', 'almost', 'more', 'reps', 'rest', 'seconds'];
+        const heard = transcript.toLowerCase().split(/\s+/);
 
-        // If any AI phrase is in the transcript, it's probably self-hearing
-        for (const phrase of aiPhrases) {
-            if (heard.includes(phrase)) {
-                console.log('Filtered AI phrase:', phrase);
-                return true;
+        // Check if any heard words match what we recently said
+        let matchCount = 0;
+        for (const word of heard) {
+            if (this.recentlySaid.includes(word)) {
+                matchCount++;
             }
         }
 
-        // Also check against recently said words
-        if (this.recentlySaid.length > 0) {
-            let matchCount = 0;
-            for (const word of heard) {
-                if (this.recentlySaid.includes(word)) {
-                    matchCount++;
-                }
-            }
-            // If more than 50% of heard words match our speech, it's self-hearing
-            if (matchCount >= heard.length * 0.5) {
-                return true;
-            }
-        }
-
-        return false;
+        // If any words match what we just said, it's self-hearing
+        return matchCount > 0;
     }
 }
 
