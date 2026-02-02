@@ -194,23 +194,45 @@ class WorkoutEngine {
 
     /**
      * Convert spoken word numbers to digits
-     * e.g., "one" -> "1", "two" -> "2"
+     * Includes phonetic near-matches for common speech recognition errors
+     * e.g., "one" -> "1", "tree" -> "3"
      */
     convertWordsToNumbers(input) {
         const wordToNumber = {
-            'zero': '0',
-            'one': '1',
-            'two': '2', 'to': '2', 'too': '2',
-            'three': '3',
-            'four': '4', 'for': '4',
-            'five': '5',
-            'six': '6',
-            'seven': '7',
-            'eight': '8',
-            'nine': '9',
-            'ten': '10',
-            'eleven': '11',
-            'twelve': '12',
+            // Zero
+            'zero': '0', 'oh': '0',
+
+            // One
+            'one': '1', 'won': '1', 'wan': '1',
+
+            // Two
+            'two': '2', 'to': '2', 'too': '2', 'tu': '2',
+
+            // Three - common mishearing
+            'three': '3', 'tree': '3', 'free': '3', 'thee': '3',
+
+            // Four
+            'four': '4', 'for': '4', 'fore': '4', 'floor': '4',
+
+            // Five
+            'five': '5', 'fife': '5', 'hive': '5',
+
+            // Six
+            'six': '6', 'sex': '6', 'sicks': '6',
+
+            // Seven
+            'seven': '7', 'sven': '7',
+
+            // Eight
+            'eight': '8', 'ate': '8', 'ait': '8',
+
+            // Nine
+            'nine': '9', 'nein': '9', 'mine': '9',
+
+            // Ten and above
+            'ten': '10', 'tin': '10',
+            'eleven': '11', 'leaven': '11',
+            'twelve': '12', 'twelfth': '12',
             'thirteen': '13',
             'fourteen': '14',
             'fifteen': '15',
