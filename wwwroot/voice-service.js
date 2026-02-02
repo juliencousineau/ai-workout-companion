@@ -231,6 +231,7 @@ class VoiceService {
 
         // Track current sentence being spoken for self-hearing detection
         this.currentSentence = cleanText.toLowerCase();
+        console.log('Set currentSentence:', this.currentSentence);
 
         // Cancel any current speech
         this.synthesis.cancel();
@@ -248,10 +249,11 @@ class VoiceService {
 
         utterance.onend = () => {
             this.isSpeaking = false;
-            // Clear current sentence after brief delay
+            // Clear current sentence after delay (long enough for echo to be recognized)
             setTimeout(() => {
+                console.log('Clearing currentSentence');
                 this.currentSentence = '';
-            }, 500);
+            }, 2000);
         };
 
         utterance.onerror = (event) => {
