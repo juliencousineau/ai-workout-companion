@@ -196,7 +196,7 @@ class App {
                 const item = document.createElement('div');
                 item.className = 'routine-item';
                 item.innerHTML = `
-                    <h3>${routine.name || 'Unnamed Routine'}</h3>
+                    <h3>${routine.title || routine.name || 'Unnamed Routine'}</h3>
                     <p>${exerciseCount} exercises</p>
                 `;
                 item.addEventListener('click', () => this.selectRoutine(routine, item));
