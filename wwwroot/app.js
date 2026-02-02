@@ -25,7 +25,8 @@ class App {
             sendBtn: document.getElementById('sendBtn'),
             voiceBtn: document.getElementById('voiceBtn'),
             workoutSummary: document.getElementById('workoutSummary'),
-            newWorkoutBtn: document.getElementById('newWorkoutBtn')
+            newWorkoutBtn: document.getElementById('newWorkoutBtn'),
+            disconnectBtn: document.getElementById('disconnectBtn')
         };
 
         this.selectedRoutine = null;
@@ -79,6 +80,9 @@ class App {
 
         // New workout button
         this.elements.newWorkoutBtn.addEventListener('click', () => this.showScreen('workoutSelect'));
+
+        // Disconnect button
+        this.elements.disconnectBtn.addEventListener('click', () => this.handleDisconnect());
     }
 
     /**
@@ -216,17 +220,40 @@ class App {
      */
     updateConnectionStatus(connected) {
         const dot = this.elements.connectionStatus.querySelector('.status-dot');
-        const text = this.elements.connectionStatus.querySelector('span:last-child');
+        const text = this.elements.connectionStatus.querySelector('span:not(.status-dot):not(button)');
 
         if (connected) {
             dot.classList.remove('disconnected');
             dot.classList.add('connected');
             text.textContent = 'Connected';
+            this.elements.disconnectBtn.style.display = 'inline-block';
         } else {
             dot.classList.remove('connected');
             dot.classList.add('disconnected');
             text.textContent = 'Not Connected';
+            this.elements.disconnectBtn.style.display = 'none';
         }
+    }
+
+    /**
+     * Handle disconnect button click
+     */
+    handleDisconnect() {
+        const provider = providerManager.getActive();
+        if (provider) {
+            provider.disconnect();
+        }
+
+        // Clear API key input
+        this.elements.apiKeyInput.value = '';
+
+        // Reset connect button
+        this.elements.connectBtn.textContent = 'Connect';
+        this.elements.connectBtn.disabled = false;
+
+        // Update status and go to setup screen
+        this.updateConnectionStatus(false);
+        this.showScreen('setup');
     }
 
     /**
