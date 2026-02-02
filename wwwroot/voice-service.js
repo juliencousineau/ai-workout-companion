@@ -50,9 +50,10 @@ class VoiceService {
                     return;
                 }
 
-                // Ignore if this sounds like what AI just said (self-hearing)
-                if (this.isSelfHearing(transcript)) {
-                    console.log('Ignoring self-hearing:', transcript);
+                // Filter out self-hearing words, keep user input
+                const cleanedTranscript = this.filterSelfHearing(transcript);
+                if (!cleanedTranscript) {
+                    console.log('Filtered out self-hearing:', transcript);
                     return;
                 }
 
@@ -62,7 +63,7 @@ class VoiceService {
                 }
 
                 if (this.onResult) {
-                    this.onResult(transcript);
+                    this.onResult(cleanedTranscript);
                 }
             }
         };
@@ -294,25 +295,25 @@ class VoiceService {
     }
 
     /**
-     * Check if transcript matches what AI is currently saying (self-hearing)
+     * Filter out self-hearing words from transcript
+     * Returns cleaned transcript with only user words, or empty string if all self-hearing
      */
-    isSelfHearing(transcript) {
-        if (!this.currentSentence) return false;
+    filterSelfHearing(transcript) {
+        if (!this.currentSentence) return transcript;
 
-        const heard = transcript.toLowerCase();
-        const heardWords = heard.split(/\s+/);
+        const heardWords = transcript.toLowerCase().split(/\s+/);
         const currentWords = this.currentSentence.split(/\s+/);
 
-        // Check if any words from current sentence match exactly in transcript
-        let matchCount = 0;
-        for (const word of currentWords) {
-            if (heardWords.includes(word)) {
-                matchCount++;
-            }
+        // Remove AI words from heard words
+        const userWords = heardWords.filter(word => !currentWords.includes(word));
+
+        // If nothing left, it was all self-hearing
+        if (userWords.length === 0) {
+            return '';
         }
 
-        // If more than 30% of AI's words are in transcript, it's self-hearing
-        return matchCount >= currentWords.length * 0.3;
+        // Return cleaned transcript with only user words
+        return userWords.join(' ');
     }
 }
 
