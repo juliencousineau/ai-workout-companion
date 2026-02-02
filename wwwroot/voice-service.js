@@ -43,6 +43,12 @@ class VoiceService {
             if (result.isFinal) {
                 const transcript = result[0].transcript.trim();
                 console.log('Speech recognized:', transcript);
+
+                // Stop AI speech if user interrupts
+                if (this.isSpeaking) {
+                    this.stopSpeaking();
+                }
+
                 if (this.onResult) {
                     this.onResult(transcript);
                 }
@@ -59,8 +65,8 @@ class VoiceService {
         this.recognition.onend = () => {
             this.isListening = false;
 
-            // Auto-restart if in continuous mode
-            if (this.continuousMode && !this.isSpeaking) {
+            // Auto-restart if in continuous mode (even during speech for interruption support)
+            if (this.continuousMode) {
                 setTimeout(() => {
                     if (this.continuousMode) {
                         this.startListening();
@@ -207,10 +213,7 @@ class VoiceService {
 
         utterance.onstart = () => {
             this.isSpeaking = true;
-            // Pause listening while speaking to avoid feedback
-            if (this.recognition && this.isListening) {
-                this.recognition.stop();
-            }
+            // Keep listening for interruption - don't stop recognition
         };
 
         utterance.onend = () => {
