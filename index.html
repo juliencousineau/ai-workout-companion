@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Workout Companion</title>
-    <meta name="description" content="AI-powered workout companion that guides you through exercises with real-time logging to Hevy">
+    <meta name="description"
+        content="AI-powered workout companion that guides you through exercises with real-time logging to Hevy">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -72,10 +75,21 @@
 
                     <!-- Chat Input -->
                     <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Type a number, 'done', or message..." class="chat-input">
+                        <button id="voiceBtn" class="btn btn-voice" title="Voice input">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                <line x1="12" y1="19" x2="12" y2="23" />
+                                <line x1="8" y1="23" x2="16" y2="23" />
+                            </svg>
+                        </button>
+                        <input type="text" id="chatInput" placeholder="Type a number, 'done', or message..."
+                            class="chat-input">
                         <button id="sendBtn" class="btn btn-primary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                             </svg>
                         </button>
                     </div>
@@ -99,7 +113,9 @@
     <script src="providers/provider-interface.js"></script>
     <script src="providers/provider-manager.js"></script>
     <script src="providers/hevy-provider.js"></script>
+    <script src="voice-service.js"></script>
     <script src="workout-engine.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

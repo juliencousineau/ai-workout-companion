@@ -23,6 +23,7 @@ class App {
             chatMessages: document.getElementById('chatMessages'),
             chatInput: document.getElementById('chatInput'),
             sendBtn: document.getElementById('sendBtn'),
+            voiceBtn: document.getElementById('voiceBtn'),
             workoutSummary: document.getElementById('workoutSummary'),
             newWorkoutBtn: document.getElementById('newWorkoutBtn')
         };
@@ -39,6 +40,7 @@ class App {
     async init() {
         this.bindEvents();
         this.setupWorkoutEngine();
+        this.setupVoiceService();
 
         // Check for saved provider credentials
         const hasCredentials = providerManager.loadSavedProvider();
@@ -72,6 +74,9 @@ class App {
             if (e.key === 'Enter') this.sendMessage();
         });
 
+        // Voice button
+        this.elements.voiceBtn.addEventListener('click', () => this.toggleVoice());
+
         // New workout button
         this.elements.newWorkoutBtn.addEventListener('click', () => this.showScreen('workoutSelect'));
     }
@@ -82,12 +87,68 @@ class App {
     setupWorkoutEngine() {
         workoutEngine.onMessage = (sender, content) => {
             this.addMessage(sender, content);
+
+            // Speak AI responses
+            if (sender === 'ai') {
+                voiceService.speak(content);
+            }
         };
 
         workoutEngine.onWorkoutComplete = async (workoutData) => {
             await this.saveWorkout(workoutData);
             this.showWorkoutComplete();
         };
+    }
+
+    /**
+     * Setup voice service callbacks
+     */
+    setupVoiceService() {
+        // Check if voice is supported
+        if (!voiceService.isRecognitionSupported()) {
+            this.elements.voiceBtn.disabled = true;
+            this.elements.voiceBtn.title = 'Voice not supported in this browser';
+            return;
+        }
+
+        // Handle speech recognition results
+        voiceService.onResult = (transcript) => {
+            this.addMessage('user', transcript);
+            workoutEngine.processInput(transcript);
+            this.updateProgressDisplay();
+        };
+
+        // Update button state when listening changes
+        voiceService.onListeningChange = (isListening) => {
+            // Button shows 'listening' class when continuous mode is active
+            if (voiceService.continuousMode) {
+                this.elements.voiceBtn.classList.add('listening');
+            } else {
+                this.elements.voiceBtn.classList.remove('listening');
+            }
+        };
+
+        // Handle voice errors
+        voiceService.onError = (error) => {
+            if (error === 'not-allowed') {
+                alert('Microphone access denied. Please enable microphone permissions.');
+                voiceService.continuousMode = false;
+                this.elements.voiceBtn.classList.remove('listening');
+            }
+        };
+    }
+
+    /**
+     * Toggle voice listening
+     */
+    toggleVoice() {
+        const isNowListening = voiceService.toggleListening();
+        // Update button immediately
+        if (isNowListening) {
+            this.elements.voiceBtn.classList.add('listening');
+        } else {
+            this.elements.voiceBtn.classList.remove('listening');
+        }
     }
 
     /**
@@ -192,12 +253,20 @@ class App {
             this.elements.routinesList.innerHTML = '';
 
             for (const routine of this.routines) {
-                const exerciseCount = routine.exercises?.length || 0;
+                const exercises = routine.exercises || [];
+                const exerciseCount = exercises.length;
+
+                // Build exercise summary (show exercise names)
+                const exerciseNames = exercises
+                    .map(e => e.title || e.exercise_title || 'Exercise')
+                    .join(' • ');
+
                 const item = document.createElement('div');
                 item.className = 'routine-item';
                 item.innerHTML = `
                     <h3>${routine.title || routine.name || 'Unnamed Routine'}</h3>
-                    <p>${exerciseCount} exercises</p>
+                    <p class="exercise-count">${exerciseCount} exercises</p>
+                    <p class="exercise-list">${exerciseNames}</p>
                 `;
                 item.addEventListener('click', () => this.selectRoutine(routine, item));
                 this.elements.routinesList.appendChild(item);

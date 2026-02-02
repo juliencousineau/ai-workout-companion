@@ -179,14 +179,55 @@ class WorkoutEngine {
             return this.skipExercise();
         }
 
+        // Convert spoken word numbers to digits
+        const convertedInput = this.convertWordsToNumbers(normalizedInput);
+
         // Check for rep counts (could be multiple: "1 2 3" or just "1")
-        const repNumbers = normalizedInput.split(/[\s,]+/).filter(n => !isNaN(n) && n !== '');
+        const repNumbers = convertedInput.split(/[\s,]+/).filter(n => !isNaN(n) && n !== '');
         if (repNumbers.length > 0) {
             return this.handleRepInput(repNumbers);
         }
 
         // Default response
         this.sendAIMessage("Tell me your rep number, 'done' when finished with the set, or 'skip' to move on.");
+    }
+
+    /**
+     * Convert spoken word numbers to digits
+     * e.g., "one" -> "1", "two" -> "2"
+     */
+    convertWordsToNumbers(input) {
+        const wordToNumber = {
+            'zero': '0',
+            'one': '1',
+            'two': '2', 'to': '2', 'too': '2',
+            'three': '3',
+            'four': '4', 'for': '4',
+            'five': '5',
+            'six': '6',
+            'seven': '7',
+            'eight': '8',
+            'nine': '9',
+            'ten': '10',
+            'eleven': '11',
+            'twelve': '12',
+            'thirteen': '13',
+            'fourteen': '14',
+            'fifteen': '15',
+            'sixteen': '16',
+            'seventeen': '17',
+            'eighteen': '18',
+            'nineteen': '19',
+            'twenty': '20'
+        };
+
+        let result = input;
+        for (const [word, num] of Object.entries(wordToNumber)) {
+            // Replace whole words only (not partial matches)
+            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+            result = result.replace(regex, num);
+        }
+        return result;
     }
 
     /**

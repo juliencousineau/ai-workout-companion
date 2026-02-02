@@ -5,25 +5,36 @@
 > [!CAUTION]
 > **ALL FEATURE REQUESTS MUST FOLLOW THIS WORKFLOW. NO EXCEPTIONS.**
 
+### 0. COMMIT CURRENT BRANCH
+- **IF ALREADY ON A FEATURE BRANCH**, commit and push all changes before proceeding
+- Run: `git add -A && git commit -m "..." && git push`
+- Then switch to main: `git checkout main && git pull`
+
 ### 1. CREATE FEATURE BRANCH
-- **BEFORE ANYTHING ELSE**, create a new branch for the feature
+- Create a new branch for the feature
 - Use naming convention: `feature/xx-feature-name` (matching planning file number)
 - Example: `feature/02-voice-commands` for planning file `02-voice-commands.md`
 
-### 2. PLANNING FIRST
+### 2. REVIEW PAST ITERATIONS
+- **BEFORE PLANNING**, read files in `/planning/` and `/walkthrough/` folders
+- Understand what has been built, the architecture, and design decisions
+- This provides context for the new feature
+
+### 3. PLANNING
 - **BEFORE ANY IMPLEMENTATION**, create a planning file in `/planning/`
 - Use incremental naming: `01-xxxx.md`, `02-xxxx.md`, `03-xxxx.md`, etc.
 - The planning file must describe WHAT will be built and HOW
+- Reference relevant past iterations and how the new feature fits
 
-### 3. USER REVIEW
+### 4. USER REVIEW
 - **WAIT FOR USER APPROVAL** before proceeding
 - Do NOT start implementation until the user has reviewed and approved the plan
 
-### 4. IMPLEMENTATION
+### 5. IMPLEMENTATION
 - Only after approval, proceed with the implementation
 - Reference the planning file in commits
 
-### 5. WALKTHROUGH
+### 6. WALKTHROUGH
 - **AFTER IMPLEMENTATION**, create a walkthrough file in `/walkthrough/`
 - Use matching name: `01-xxxx-walkthrough.md` (matches planning file)
 - Document what was built, files created, and how to use it
