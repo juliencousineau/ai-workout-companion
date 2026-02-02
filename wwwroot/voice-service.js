@@ -44,7 +44,12 @@ class VoiceService {
                 const transcript = result[0].transcript.trim();
                 console.log('Speech recognized:', transcript);
 
-                // Stop AI speech if user interrupts
+                // Only process meaningful input (ignore noise/short sounds)
+                if (transcript.length < 2) {
+                    return;
+                }
+
+                // Stop AI speech if user interrupts with real input
                 if (this.isSpeaking) {
                     this.stopSpeaking();
                 }
