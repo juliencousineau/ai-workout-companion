@@ -27,6 +27,7 @@ class VoiceService {
         this.isListening = false;
         this.isSpeaking = false;
         this.continuousMode = false;  // When true, auto-restart listening
+        this.recentlySaid = [];  // Track what AI recently said to ignore self-hearing
 
         // Callbacks
         this.onResult = null;
@@ -46,6 +47,12 @@ class VoiceService {
 
                 // Only process meaningful input (ignore noise/short sounds)
                 if (transcript.length < 2) {
+                    return;
+                }
+
+                // Ignore if this sounds like what AI just said (self-hearing)
+                if (this.isSelfHearing(transcript)) {
+                    console.log('Ignoring self-hearing:', transcript);
                     return;
                 }
 
@@ -221,6 +228,10 @@ class VoiceService {
         const cleanText = this.cleanTextForSpeech(text);
         if (!cleanText) return;
 
+        // Track what we're saying to detect self-hearing
+        const words = cleanText.toLowerCase().split(/\s+/);
+        this.recentlySaid.push(...words);
+
         // Cancel any current speech
         this.synthesis.cancel();
 
@@ -232,18 +243,15 @@ class VoiceService {
 
         utterance.onstart = () => {
             this.isSpeaking = true;
-            // Stop listening while speaking to prevent hearing ourselves
-            if (this.recognition && this.isListening) {
-                this.recognition.stop();
-            }
+            // Keep listening - we'll filter out self-hearing instead
         };
 
         utterance.onend = () => {
             this.isSpeaking = false;
-            // Resume continuous listening after speaking
-            if (this.continuousMode) {
-                setTimeout(() => this.startListening(), 300);
-            }
+            // Clear recently said after a delay (give time for echo to be recognized)
+            setTimeout(() => {
+                this.recentlySaid = [];
+            }, 1000);
         };
 
         utterance.onerror = (event) => {
@@ -284,6 +292,24 @@ class VoiceService {
             // Clean up extra whitespace
             .replace(/\s+/g, ' ')
             .trim();
+    }
+
+    /**
+     * Check if transcript matches what AI recently said (self-hearing)
+     */
+    isSelfHearing(transcript) {
+        if (this.recentlySaid.length === 0) return false;
+
+        const heard = transcript.toLowerCase().split(/\s+/);
+        // Check if most words in transcript match what we recently said
+        let matchCount = 0;
+        for (const word of heard) {
+            if (this.recentlySaid.includes(word)) {
+                matchCount++;
+            }
+        }
+        // If more than 50% of heard words match our speech, it's self-hearing
+        return matchCount >= heard.length * 0.5;
     }
 }
 
