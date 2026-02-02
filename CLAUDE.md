@@ -11,7 +11,11 @@
 - Then switch to main: `git checkout main && git pull`
 
 ### 1. CREATE FEATURE BRANCH
-- Create a new branch for the feature
+- Create a new branch for the feature: `git checkout -b feature/xx-feature-name`
+- **Pull main into this branch**: `git pull origin main`
+- **⏸️ PAUSE**: Ask the user: "Would you like to merge the previous feature branch PR first before I continue? (yes/no)"
+  - If yes, wait for user to confirm the merge is complete, then run `git pull origin main` again
+  - If no, continue with the workflow
 - Use naming convention: `feature/xx-feature-name` (matching planning file number)
 - Example: `feature/02-voice-commands` for planning file `02-voice-commands.md`
 
