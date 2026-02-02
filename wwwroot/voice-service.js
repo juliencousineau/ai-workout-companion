@@ -299,11 +299,6 @@ class VoiceService {
     isSelfHearing(transcript) {
         if (!this.currentSentence) return false;
 
-        // If transcript contains any digits, it's user input (AI never says numbers)
-        if (/\d/.test(transcript)) {
-            return false;
-        }
-
         const heard = transcript.toLowerCase();
         const heardWords = heard.split(/\s+/);
         const currentWords = this.currentSentence.split(/\s+/);
