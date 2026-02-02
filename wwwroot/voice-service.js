@@ -305,12 +305,13 @@ class VoiceService {
         }
 
         const heard = transcript.toLowerCase();
+        const heardWords = heard.split(/\s+/);
         const currentWords = this.currentSentence.split(/\s+/);
 
-        // Check if any words from current sentence appear in transcript
+        // Check if any words from current sentence match exactly in transcript
         let matchCount = 0;
         for (const word of currentWords) {
-            if (heard.includes(word)) {
+            if (heardWords.includes(word)) {
                 matchCount++;
             }
         }
