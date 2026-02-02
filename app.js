@@ -120,7 +120,8 @@ class App {
 
         // Update button state when listening changes
         voiceService.onListeningChange = (isListening) => {
-            if (isListening) {
+            // Button shows 'listening' class when continuous mode is active
+            if (voiceService.continuousMode) {
                 this.elements.voiceBtn.classList.add('listening');
             } else {
                 this.elements.voiceBtn.classList.remove('listening');
@@ -131,6 +132,8 @@ class App {
         voiceService.onError = (error) => {
             if (error === 'not-allowed') {
                 alert('Microphone access denied. Please enable microphone permissions.');
+                voiceService.continuousMode = false;
+                this.elements.voiceBtn.classList.remove('listening');
             }
         };
     }
@@ -139,7 +142,13 @@ class App {
      * Toggle voice listening
      */
     toggleVoice() {
-        voiceService.toggleListening();
+        const isNowListening = voiceService.toggleListening();
+        // Update button immediately
+        if (isNowListening) {
+            this.elements.voiceBtn.classList.add('listening');
+        } else {
+            this.elements.voiceBtn.classList.remove('listening');
+        }
     }
 
     /**

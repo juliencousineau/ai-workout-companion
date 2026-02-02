@@ -26,6 +26,7 @@ class VoiceService {
         // State
         this.isListening = false;
         this.isSpeaking = false;
+        this.continuousMode = false;  // When true, auto-restart listening
 
         // Callbacks
         this.onResult = null;
@@ -57,18 +58,35 @@ class VoiceService {
 
         this.recognition.onend = () => {
             this.isListening = false;
-            if (this.onListeningChange) {
-                this.onListeningChange(false);
+
+            // Auto-restart if in continuous mode
+            if (this.continuousMode && !this.isSpeaking) {
+                setTimeout(() => {
+                    if (this.continuousMode) {
+                        this.startListening();
+                    }
+                }, 100);
+            } else {
+                if (this.onListeningChange) {
+                    this.onListeningChange(false);
+                }
             }
         };
 
         this.recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
+
+            // Don't stop continuous mode for no-speech errors
+            if (event.error === 'no-speech' && this.continuousMode) {
+                // Just restart
+                return;
+            }
+
             this.isListening = false;
             if (this.onListeningChange) {
                 this.onListeningChange(false);
             }
-            if (this.onError) {
+            if (this.onError && event.error !== 'no-speech') {
                 this.onError(event.error);
             }
         };
@@ -137,21 +155,30 @@ class VoiceService {
      * Stop listening for speech input
      */
     stopListening() {
+        this.continuousMode = false;
         if (this.recognition && this.isListening) {
             this.recognition.stop();
         }
     }
 
     /**
-     * Toggle listening state
+     * Toggle continuous listening mode
      */
     toggleListening() {
-        if (this.isListening) {
+        if (this.continuousMode) {
             this.stopListening();
         } else {
-            this.startListening();
+            this.startContinuousListening();
         }
-        return this.isListening;
+        return this.continuousMode;
+    }
+
+    /**
+     * Start continuous listening mode
+     */
+    startContinuousListening() {
+        this.continuousMode = true;
+        this.startListening();
     }
 
     /**
@@ -180,15 +207,27 @@ class VoiceService {
 
         utterance.onstart = () => {
             this.isSpeaking = true;
+            // Pause listening while speaking to avoid feedback
+            if (this.recognition && this.isListening) {
+                this.recognition.stop();
+            }
         };
 
         utterance.onend = () => {
             this.isSpeaking = false;
+            // Resume continuous listening after speaking
+            if (this.continuousMode) {
+                setTimeout(() => this.startListening(), 200);
+            }
         };
 
         utterance.onerror = (event) => {
             console.error('Speech synthesis error:', event.error);
             this.isSpeaking = false;
+            // Resume continuous listening after error
+            if (this.continuousMode) {
+                setTimeout(() => this.startListening(), 200);
+            }
         };
 
         this.synthesis.speak(utterance);
