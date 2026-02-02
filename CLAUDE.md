@@ -1,24 +1,29 @@
-# AI Exercise Logbook
+# AI Workout Companion
 
-## CRITICAL: MANDATORY WORKFLOW
+## CRITICAL: MANDATORY WORKFLOW — `safe-doc`
 
 > [!CAUTION]
 > **ALL FEATURE REQUESTS MUST FOLLOW THIS WORKFLOW. NO EXCEPTIONS.**
 
-### 1. PLANNING FIRST
+### 1. CREATE FEATURE BRANCH
+- **BEFORE ANYTHING ELSE**, create a new branch for the feature
+- Use naming convention: `feature/xx-feature-name` (matching planning file number)
+- Example: `feature/02-voice-commands` for planning file `02-voice-commands.md`
+
+### 2. PLANNING FIRST
 - **BEFORE ANY IMPLEMENTATION**, create a planning file in `/planning/`
 - Use incremental naming: `01-xxxx.md`, `02-xxxx.md`, `03-xxxx.md`, etc.
 - The planning file must describe WHAT will be built and HOW
 
-### 2. USER REVIEW
+### 3. USER REVIEW
 - **WAIT FOR USER APPROVAL** before proceeding
 - Do NOT start implementation until the user has reviewed and approved the plan
 
-### 3. IMPLEMENTATION
+### 4. IMPLEMENTATION
 - Only after approval, proceed with the implementation
 - Reference the planning file in commits
 
-### 4. WALKTHROUGH
+### 5. WALKTHROUGH
 - **AFTER IMPLEMENTATION**, create a walkthrough file in `/walkthrough/`
 - Use matching name: `01-xxxx-walkthrough.md` (matches planning file)
 - Document what was built, files created, and how to use it

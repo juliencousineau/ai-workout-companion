@@ -1,40 +1,76 @@
 /**
- * Hevy API Client
- * Handles all communication with the Hevy API
+ * Hevy Provider
+ * Implements WorkoutProvider interface for Hevy API
  */
 
-class HevyAPI {
+class HevyProvider extends WorkoutProvider {
     constructor() {
+        super();
+        this.name = 'Hevy';
         this.baseUrl = 'https://api.hevyapp.com/v1';
         this.apiKey = null;
     }
 
     /**
-     * Set the API key for authentication
-     */
-    setApiKey(key) {
-        this.apiKey = key;
-        localStorage.setItem('hevy_api_key', key);
-    }
-
-    /**
      * Load API key from localStorage
+     * @returns {boolean}
      */
-    loadApiKey() {
+    loadCredentials() {
         this.apiKey = localStorage.getItem('hevy_api_key');
-        return this.apiKey;
+        this.connected = !!this.apiKey;
+        return this.connected;
     }
 
     /**
-     * Clear the API key
+     * Connect with API key
+     * @param {Object} credentials - { apiKey: string }
+     * @returns {Promise<boolean>}
      */
-    clearApiKey() {
+    async connect(credentials) {
+        if (!credentials.apiKey) {
+            throw new Error('API key is required');
+        }
+
+        this.apiKey = credentials.apiKey;
+        localStorage.setItem('hevy_api_key', this.apiKey);
+
+        const success = await this.testConnection();
+        this.connected = success;
+
+        if (!success) {
+            this.disconnect();
+        }
+
+        return success;
+    }
+
+    /**
+     * Test the API connection
+     * @returns {Promise<boolean>}
+     */
+    async testConnection() {
+        try {
+            await this.request('/workouts/count');
+            this.connected = true;
+            return true;
+        } catch (error) {
+            this.connected = false;
+            return false;
+        }
+    }
+
+    /**
+     * Disconnect and clear credentials
+     */
+    disconnect() {
         this.apiKey = null;
+        this.connected = false;
         localStorage.removeItem('hevy_api_key');
     }
 
     /**
      * Make an authenticated request to the Hevy API
+     * @private
      */
     async request(endpoint, options = {}) {
         if (!this.apiKey) {
@@ -69,19 +105,8 @@ class HevyAPI {
     }
 
     /**
-     * Test the API connection
-     */
-    async testConnection() {
-        try {
-            await this.request('/workouts/count');
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    /**
      * Get all routines
+     * @returns {Promise<{routines: Array}>}
      */
     async getRoutines(page = 1, pageSize = 20) {
         return await this.request(`/routines?page=${page}&page_size=${pageSize}`);
@@ -89,6 +114,7 @@ class HevyAPI {
 
     /**
      * Get a specific routine by ID
+     * @returns {Promise<{routine: Object}>}
      */
     async getRoutine(routineId) {
         return await this.request(`/routines/${routineId}`);
@@ -96,6 +122,7 @@ class HevyAPI {
 
     /**
      * Get exercise templates
+     * @returns {Promise<{exercise_templates: Array}>}
      */
     async getExerciseTemplates(page = 1, pageSize = 100) {
         return await this.request(`/exercise_templates?page=${page}&page_size=${pageSize}`);
@@ -110,6 +137,7 @@ class HevyAPI {
 
     /**
      * Get workouts
+     * @returns {Promise<{workouts: Array}>}
      */
     async getWorkouts(page = 1, pageSize = 10) {
         return await this.request(`/workouts?page=${page}&page_size=${pageSize}`);
@@ -124,6 +152,7 @@ class HevyAPI {
 
     /**
      * Create a new workout log
+     * @returns {Promise<Object>}
      */
     async createWorkout(workoutData) {
         return await this.request('/workouts', {
@@ -143,5 +172,6 @@ class HevyAPI {
     }
 }
 
-// Export singleton instance
-const hevyApi = new HevyAPI();
+// Register with provider manager
+const hevyProvider = new HevyProvider();
+providerManager.register('hevy', hevyProvider);

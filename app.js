@@ -40,9 +40,9 @@ class App {
         this.bindEvents();
         this.setupWorkoutEngine();
 
-        // Check for saved API key
-        const savedKey = hevyApi.loadApiKey();
-        if (savedKey) {
+        // Check for saved provider credentials
+        const hasCredentials = providerManager.loadSavedProvider();
+        if (hasCredentials) {
             this.elements.apiKeyInput.value = '••••••••••••••••';
             await this.testConnection();
         }
@@ -103,16 +103,29 @@ class App {
         this.elements.connectBtn.textContent = 'Connecting...';
         this.elements.connectBtn.disabled = true;
 
-        hevyApi.setApiKey(apiKey);
+        // Ensure Hevy provider is active
+        providerManager.setActive('hevy');
+        const provider = providerManager.getActive();
 
-        const connected = await this.testConnection();
+        const connected = await provider.connect({ apiKey });
 
         if (!connected) {
-            hevyApi.clearApiKey();
+            provider.disconnect();
             this.elements.connectBtn.textContent = 'Connect';
             this.elements.connectBtn.disabled = false;
             alert('Invalid API key. Please check and try again.');
+        } else {
+            await this.onConnected();
         }
+    }
+
+    /**
+     * Handle successful connection
+     */
+    async onConnected() {
+        this.updateConnectionStatus(true);
+        await this.loadRoutines();
+        this.showScreen('workoutSelect');
     }
 
     /**
@@ -120,12 +133,13 @@ class App {
      */
     async testConnection() {
         try {
-            const connected = await hevyApi.testConnection();
+            const provider = providerManager.getActive();
+            if (!provider) return false;
+
+            const connected = await provider.testConnection();
 
             if (connected) {
-                this.updateConnectionStatus(true);
-                await this.loadRoutines();
-                this.showScreen('workoutSelect');
+                await this.onConnected();
                 return true;
             }
         } catch (error) {
@@ -155,13 +169,14 @@ class App {
     }
 
     /**
-     * Load routines from Hevy
+     * Load routines from provider
      */
     async loadRoutines() {
         try {
             this.elements.routinesList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
-            const response = await hevyApi.getRoutines();
+            const provider = providerManager.getActive();
+            const response = await provider.getRoutines();
             this.routines = response.routines || [];
 
             if (this.routines.length === 0) {
@@ -221,7 +236,8 @@ class App {
 
         // Fetch full routine details if needed
         try {
-            const fullRoutine = await hevyApi.getRoutine(this.selectedRoutine.id);
+            const provider = providerManager.getActive();
+            const fullRoutine = await provider.getRoutine(this.selectedRoutine.id);
             this.selectedRoutine = fullRoutine.routine || fullRoutine;
         } catch (error) {
             console.error('Failed to fetch routine details:', error);
@@ -300,12 +316,13 @@ class App {
     }
 
     /**
-     * Save workout to Hevy
+     * Save workout to provider
      */
     async saveWorkout(workoutData) {
         try {
-            await hevyApi.createWorkout(workoutData);
-            console.log('Workout saved to Hevy');
+            const provider = providerManager.getActive();
+            await provider.createWorkout(workoutData);
+            console.log('Workout saved to provider');
         } catch (error) {
             console.error('Failed to save workout:', error);
             // Still show complete screen, but maybe show error
