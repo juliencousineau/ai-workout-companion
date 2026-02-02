@@ -275,7 +275,9 @@ class WorkoutEngine {
             if (spokenRep > this.currentRep && spokenRep <= targetReps) {
                 this.currentRep = spokenRep;
             } else if (spokenRep === this.currentRep) {
-                // Same number repeated - ignore silently
+                // Same number repeated - re-announce current state
+                const repsRemaining = targetReps - this.currentRep;
+                messages.push(`${repsRemaining} ✓ ${this.getMotivation('repComplete')}`);
                 continue;
             } else if (spokenRep < this.currentRep) {
                 // Number lower than current - ignore (probably heard old audio)
