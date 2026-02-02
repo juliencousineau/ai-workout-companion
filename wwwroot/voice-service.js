@@ -301,8 +301,11 @@ class VoiceService {
     filterSelfHearing(transcript) {
         if (!this.currentSentence) return transcript;
 
-        const heardWords = transcript.toLowerCase().split(/\s+/);
-        const currentWords = this.currentSentence.split(/\s+/);
+        // Strip punctuation from words for comparison
+        const stripPunctuation = (word) => word.replace(/[.,!?;:]/g, '');
+
+        const heardWords = transcript.toLowerCase().split(/\s+/).map(stripPunctuation);
+        const currentWords = this.currentSentence.split(/\s+/).map(stripPunctuation);
 
         // Remove AI words from heard words
         const userWords = heardWords.filter(word => !currentWords.includes(word));
