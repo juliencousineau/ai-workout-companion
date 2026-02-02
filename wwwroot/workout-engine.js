@@ -15,6 +15,7 @@ class WorkoutEngine {
         this.workoutData = null;
         this.timerInterval = null;
         this.timerSeconds = 0;
+        this.restTimerInterval = null;
 
         // Callback for sending messages
         this.onMessage = null;
@@ -308,7 +309,12 @@ class WorkoutEngine {
                 messages.push(this.getMotivation('exerciseComplete'));
                 this.moveToNextExercise();
             } else {
-                messages.push(`Rest up. Ready for Set ${this.currentSetIndex + 1}?`);
+                // Start rest timer if rest_seconds is defined
+                const restSeconds = exercise.rest_seconds || 60;
+                messages.push(`Rest for ${restSeconds} seconds...`);
+                this.sendAIMessage(messages.join('\n'));
+                this.startRestTimer(restSeconds, this.currentSetIndex + 1);
+                return; // Exit early, rest timer will handle the next message
             }
         }
 
@@ -333,12 +339,42 @@ class WorkoutEngine {
             // Done with current set, not all sets
             this.currentSetIndex++;
             this.currentRep = 0;
-            this.sendAIMessage(`${this.getMotivation('setComplete')}\nReady for Set ${this.currentSetIndex + 1}?`);
+            const exercise = this.getCurrentExercise();
+            const restSeconds = exercise.rest_seconds || 60;
+            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
+            this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         } else {
             // Done with exercise
             this.sendAIMessage(this.getMotivation('exerciseComplete'));
             this.moveToNextExercise();
         }
+    }
+
+    /**
+     * Start rest timer countdown between sets
+     */
+    startRestTimer(duration, nextSetNumber) {
+        let remaining = duration;
+
+        // Clear any existing rest timer
+        if (this.restTimerInterval) {
+            clearInterval(this.restTimerInterval);
+        }
+
+        this.restTimerInterval = setInterval(() => {
+            remaining--;
+
+            // Milestone announcements
+            if (remaining === 30 && duration > 45) {
+                this.sendAIMessage('⏱️ 30 seconds left...');
+            } else if (remaining === 10) {
+                this.sendAIMessage('⏱️ 10 seconds - get ready!');
+            } else if (remaining === 0) {
+                clearInterval(this.restTimerInterval);
+                this.restTimerInterval = null;
+                this.sendAIMessage(`💪 Rest over! Ready for Set ${nextSetNumber}?`);
+            }
+        }, 1000);
     }
 
     /**
