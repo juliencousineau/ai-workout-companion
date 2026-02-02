@@ -307,8 +307,17 @@ class VoiceService {
         const heardWords = transcript.toLowerCase().split(/\s+/).map(stripPunctuation);
         const currentWords = this.currentSentence.split(/\s+/).map(stripPunctuation);
 
+        console.log('Filter debug:', {
+            transcript,
+            currentSentence: this.currentSentence,
+            heardWords,
+            currentWords
+        });
+
         // Remove AI words from heard words
         const userWords = heardWords.filter(word => !currentWords.includes(word));
+
+        console.log('After filtering:', { userWords });
 
         // If nothing left, it was all self-hearing
         if (userWords.length === 0) {
