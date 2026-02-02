@@ -264,7 +264,10 @@ class WorkoutEngine {
         const targetReps = exercise.reps || 10;
         let messages = [];
 
-        for (const repNumStr of repNumbers) {
+        // Deduplicate repeated numbers (e.g., "two two" -> just "2")
+        const uniqueReps = [...new Set(repNumbers)];
+
+        for (const repNumStr of uniqueReps) {
             const spokenRep = parseInt(repNumStr, 10);
 
             // Use the spoken number if it's valid and ahead of current rep
