@@ -387,12 +387,9 @@ class App {
         this.updateProgressDisplay();
 
         // Auto-start listening immediately (user already clicked so permissions should work)
-        console.log('Auto-start check: voiceService exists:', !!voiceService, 'continuousMode:', voiceService?.continuousMode);
         if (!voiceService.continuousMode) {
-            console.log('Starting continuous listening...');
             voiceService.startContinuousListening();
             this.elements.voiceBtn.classList.add('listening');
-            console.log('Continuous listening started, button updated');
         }
     }
 

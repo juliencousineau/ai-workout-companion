@@ -157,21 +157,17 @@ class VoiceService {
      * Start listening for speech input
      */
     startListening() {
-        console.log('startListening called, recognition:', !!this.recognition, 'isListening:', this.isListening);
-
         if (!this.recognition) {
             console.error('Speech recognition not supported');
             return false;
         }
 
         if (this.isListening) {
-            console.log('Already listening, skipping start');
             return true;
         }
 
         try {
             this.recognition.start();
-            console.log('Speech recognition started successfully');
             return true;
         } catch (error) {
             console.error('Failed to start speech recognition:', error);
