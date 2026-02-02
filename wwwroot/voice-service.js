@@ -27,7 +27,7 @@ class VoiceService {
         this.isListening = false;
         this.isSpeaking = false;
         this.continuousMode = false;  // When true, auto-restart listening
-        this.recentlySaid = [];  // Track what AI recently said to ignore self-hearing
+        this.currentSentence = '';  // Track current sentence being spoken
 
         // Callbacks
         this.onResult = null;
@@ -228,9 +228,8 @@ class VoiceService {
         const cleanText = this.cleanTextForSpeech(text);
         if (!cleanText) return;
 
-        // Track what we're saying to detect self-hearing
-        const words = cleanText.toLowerCase().split(/\s+/);
-        this.recentlySaid.push(...words);
+        // Track current sentence being spoken for self-hearing detection
+        this.currentSentence = cleanText.toLowerCase();
 
         // Cancel any current speech
         this.synthesis.cancel();
@@ -248,10 +247,10 @@ class VoiceService {
 
         utterance.onend = () => {
             this.isSpeaking = false;
-            // Clear recently said after a delay (give time for echo to be recognized)
+            // Clear current sentence after brief delay
             setTimeout(() => {
-                this.recentlySaid = [];
-            }, 1000);
+                this.currentSentence = '';
+            }, 500);
         };
 
         utterance.onerror = (event) => {
@@ -295,23 +294,29 @@ class VoiceService {
     }
 
     /**
-     * Check if transcript matches what AI recently said (self-hearing)
+     * Check if transcript matches what AI is currently saying (self-hearing)
      */
     isSelfHearing(transcript) {
-        if (this.recentlySaid.length === 0) return false;
+        if (!this.currentSentence) return false;
 
-        const heard = transcript.toLowerCase().split(/\s+/);
+        // If transcript contains any digits, it's user input (AI never says numbers)
+        if (/\d/.test(transcript)) {
+            return false;
+        }
 
-        // Check if any heard words match what we recently said
+        const heard = transcript.toLowerCase();
+        const currentWords = this.currentSentence.split(/\s+/);
+
+        // Check if any words from current sentence appear in transcript
         let matchCount = 0;
-        for (const word of heard) {
-            if (this.recentlySaid.includes(word)) {
+        for (const word of currentWords) {
+            if (heard.includes(word)) {
                 matchCount++;
             }
         }
 
-        // If any words match what we just said, it's self-hearing
-        return matchCount > 0;
+        // If more than 30% of AI's words are in transcript, it's self-hearing
+        return matchCount >= currentWords.length * 0.3;
     }
 }
 
