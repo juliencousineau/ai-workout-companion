@@ -105,11 +105,26 @@ class VoiceService {
         // Voices may load asynchronously
         const setVoice = () => {
             const voices = this.synthesis.getVoices();
-            // Prefer a natural-sounding English voice
-            this.voice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Samantha')) ||
-                voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) ||
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+
+            // Prefer premium/enhanced voices (less robotic)
+            // macOS Premium voices: Karen, Daniel, Moira, Samantha (Enhanced)
+            // Chrome: Google UK English Female/Male are more natural
+            this.voice =
+                // macOS enhanced voices
+                voices.find(v => v.name.includes('Karen') && v.lang.startsWith('en')) ||
+                voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
+                voices.find(v => v.name.includes('Moira') && v.lang.startsWith('en')) ||
+                voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
+                // Google voices (Chrome)
+                voices.find(v => v.name.includes('Google UK English Female')) ||
+                voices.find(v => v.name.includes('Google UK English Male')) ||
+                voices.find(v => v.name.includes('Google US English')) ||
+                // Any English voice
                 voices.find(v => v.lang.startsWith('en')) ||
                 voices[0];
+
+            console.log('Selected voice:', this.voice?.name);
         };
 
         if (this.synthesis.getVoices().length > 0) {
