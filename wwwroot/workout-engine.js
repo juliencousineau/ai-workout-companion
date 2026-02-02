@@ -364,11 +364,9 @@ class WorkoutEngine {
         this.restTimerInterval = setInterval(() => {
             remaining--;
 
-            // Milestone announcements
-            if (remaining === 30 && duration > 45) {
-                this.sendAIMessage('⏱️ 30 seconds left...');
-            } else if (remaining === 10) {
-                this.sendAIMessage('⏱️ 10 seconds - get ready!');
+            // Announce every 10 seconds
+            if (remaining > 0 && remaining % 10 === 0) {
+                this.sendAIMessage(`⏱️ ${remaining} seconds...`);
             } else if (remaining === 0) {
                 clearInterval(this.restTimerInterval);
                 this.restTimerInterval = null;
