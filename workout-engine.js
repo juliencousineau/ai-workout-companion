@@ -93,7 +93,7 @@ class WorkoutEngine {
 
         // Initialize workout data structure
         this.workoutData = {
-            title: routine.name || 'Workout',
+            title: routine.title || routine.name || 'Workout',
             start_time: this.workoutStartTime.toISOString(),
             exercises: []
         };
