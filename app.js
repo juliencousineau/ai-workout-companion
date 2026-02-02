@@ -23,6 +23,7 @@ class App {
             chatMessages: document.getElementById('chatMessages'),
             chatInput: document.getElementById('chatInput'),
             sendBtn: document.getElementById('sendBtn'),
+            voiceBtn: document.getElementById('voiceBtn'),
             workoutSummary: document.getElementById('workoutSummary'),
             newWorkoutBtn: document.getElementById('newWorkoutBtn')
         };
@@ -39,6 +40,7 @@ class App {
     async init() {
         this.bindEvents();
         this.setupWorkoutEngine();
+        this.setupVoiceService();
 
         // Check for saved provider credentials
         const hasCredentials = providerManager.loadSavedProvider();
@@ -72,6 +74,9 @@ class App {
             if (e.key === 'Enter') this.sendMessage();
         });
 
+        // Voice button
+        this.elements.voiceBtn.addEventListener('click', () => this.toggleVoice());
+
         // New workout button
         this.elements.newWorkoutBtn.addEventListener('click', () => this.showScreen('workoutSelect'));
     }
@@ -82,12 +87,59 @@ class App {
     setupWorkoutEngine() {
         workoutEngine.onMessage = (sender, content) => {
             this.addMessage(sender, content);
+
+            // Speak AI responses
+            if (sender === 'ai') {
+                voiceService.speak(content);
+            }
         };
 
         workoutEngine.onWorkoutComplete = async (workoutData) => {
             await this.saveWorkout(workoutData);
             this.showWorkoutComplete();
         };
+    }
+
+    /**
+     * Setup voice service callbacks
+     */
+    setupVoiceService() {
+        // Check if voice is supported
+        if (!voiceService.isRecognitionSupported()) {
+            this.elements.voiceBtn.disabled = true;
+            this.elements.voiceBtn.title = 'Voice not supported in this browser';
+            return;
+        }
+
+        // Handle speech recognition results
+        voiceService.onResult = (transcript) => {
+            this.addMessage('user', transcript);
+            workoutEngine.processInput(transcript);
+            this.updateProgressDisplay();
+        };
+
+        // Update button state when listening changes
+        voiceService.onListeningChange = (isListening) => {
+            if (isListening) {
+                this.elements.voiceBtn.classList.add('listening');
+            } else {
+                this.elements.voiceBtn.classList.remove('listening');
+            }
+        };
+
+        // Handle voice errors
+        voiceService.onError = (error) => {
+            if (error === 'not-allowed') {
+                alert('Microphone access denied. Please enable microphone permissions.');
+            }
+        };
+    }
+
+    /**
+     * Toggle voice listening
+     */
+    toggleVoice() {
+        voiceService.toggleListening();
     }
 
     /**
