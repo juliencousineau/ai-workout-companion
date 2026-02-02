@@ -253,12 +253,20 @@ class App {
             this.elements.routinesList.innerHTML = '';
 
             for (const routine of this.routines) {
-                const exerciseCount = routine.exercises?.length || 0;
+                const exercises = routine.exercises || [];
+                const exerciseCount = exercises.length;
+
+                // Build exercise summary (show exercise names)
+                const exerciseNames = exercises
+                    .map(e => e.title || e.exercise_title || 'Exercise')
+                    .join(' • ');
+
                 const item = document.createElement('div');
                 item.className = 'routine-item';
                 item.innerHTML = `
                     <h3>${routine.title || routine.name || 'Unnamed Routine'}</h3>
-                    <p>${exerciseCount} exercises</p>
+                    <p class="exercise-count">${exerciseCount} exercises</p>
+                    <p class="exercise-list">${exerciseNames}</p>
                 `;
                 item.addEventListener('click', () => this.selectRoutine(routine, item));
                 this.elements.routinesList.appendChild(item);
