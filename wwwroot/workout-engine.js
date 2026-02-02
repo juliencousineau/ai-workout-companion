@@ -254,6 +254,7 @@ class WorkoutEngine {
 
     /**
      * Handle rep input from user
+     * Uses the actual spoken number as the current rep (smart sequencing)
      */
     handleRepInput(repNumbers) {
         const exercise = this.getCurrentExercise();
@@ -262,8 +263,20 @@ class WorkoutEngine {
         const targetReps = exercise.reps || 10;
         let messages = [];
 
-        for (const repNum of repNumbers) {
-            this.currentRep++;
+        for (const repNumStr of repNumbers) {
+            const spokenRep = parseInt(repNumStr, 10);
+
+            // Use the spoken number if it's valid and ahead of current rep
+            // Otherwise just increment (for cases like counting "1 2 3" sequentially)
+            if (spokenRep > this.currentRep && spokenRep <= targetReps) {
+                this.currentRep = spokenRep;
+            } else if (spokenRep === this.currentRep + 1) {
+                this.currentRep = spokenRep;
+            } else {
+                // Just increment for unrecognized patterns
+                this.currentRep++;
+            }
+
             const repsRemaining = targetReps - this.currentRep;
 
             let motivation = this.getMotivation('repComplete');
