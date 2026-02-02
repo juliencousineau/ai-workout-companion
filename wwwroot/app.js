@@ -385,6 +385,14 @@ class App {
 
         // Update progress display
         this.updateProgressDisplay();
+
+        // Auto-start listening after first message is spoken
+        if (!voiceService.continuousMode) {
+            setTimeout(() => {
+                voiceService.startContinuousListening();
+                this.elements.voiceBtn.classList.add('listening');
+            }, 1500);  // Wait for initial speech to start
+        }
     }
 
     /**
