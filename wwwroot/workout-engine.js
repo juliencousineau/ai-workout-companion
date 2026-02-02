@@ -270,15 +270,19 @@ class WorkoutEngine {
         for (const repNumStr of uniqueReps) {
             const spokenRep = parseInt(repNumStr, 10);
 
-            // Use the spoken number if it's valid and ahead of current rep
-            // Otherwise just increment (for cases like counting "1 2 3" sequentially)
+            // Only process if the spoken number advances the count
+            // Saying "four" twice should NOT keep counting up
             if (spokenRep > this.currentRep && spokenRep <= targetReps) {
                 this.currentRep = spokenRep;
-            } else if (spokenRep === this.currentRep + 1) {
-                this.currentRep = spokenRep;
+            } else if (spokenRep === this.currentRep) {
+                // Same number repeated - ignore silently
+                continue;
+            } else if (spokenRep < this.currentRep) {
+                // Number lower than current - ignore (probably heard old audio)
+                continue;
             } else {
-                // Just increment for unrecognized patterns
-                this.currentRep++;
+                // Number higher than target - ignore
+                continue;
             }
 
             const repsRemaining = targetReps - this.currentRep;
