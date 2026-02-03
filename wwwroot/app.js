@@ -48,6 +48,7 @@ class App {
             signedInView: document.getElementById('signedInView'),
             guestView: document.getElementById('guestView'),
             continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
+            guestSignOutBtn: document.getElementById('guestSignOutBtn'),
             userProfilePic: document.getElementById('userProfilePic'),
             userName: document.getElementById('userName'),
             signOutBtn: document.getElementById('signOutBtn')
@@ -142,6 +143,16 @@ class App {
     }
 
     /**
+     * Exit guest mode and return to welcome screen
+     */
+    exitGuestMode() {
+        this.isGuestMode = false;
+        localStorage.removeItem('guest_mode');
+        this.elements.guestView.style.display = 'none';
+        this.showScreen('welcome');
+    }
+
+    /**
      * Handle user sign in
      */
     handleSignIn(user) {
@@ -223,6 +234,11 @@ class App {
         // Continue as guest button
         this.elements.continueAsGuestBtn.addEventListener('click', () => {
             this.enterGuestMode();
+        });
+
+        // Guest sign out button
+        this.elements.guestSignOutBtn.addEventListener('click', () => {
+            this.exitGuestMode();
         });
 
         // Voice settings link
