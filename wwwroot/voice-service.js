@@ -10,7 +10,7 @@ class VoiceService {
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
             this.recognition.continuous = false;
-            this.recognition.interimResults = false;
+            this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
             this.setupRecognitionHandlers();
         } else {
@@ -23,10 +23,16 @@ class VoiceService {
         this.voice = null;
         this.loadVoices();
 
+        // Voice settings - load from localStorage or use defaults
+        this.pitch = parseFloat(localStorage.getItem('tts_pitch')) || 1.05;
+        this.rate = parseFloat(localStorage.getItem('tts_rate')) || 1.2;
+        this.volume = parseFloat(localStorage.getItem('tts_volume')) || 1.0;
+
         // State
         this.isListening = false;
         this.isSpeaking = false;
         this.continuousMode = false;  // When true, auto-restart listening
+        this.recentSentences = [];  // Track recent sentences with timestamps
 
         // Callbacks
         this.onResult = null;
@@ -39,15 +45,54 @@ class VoiceService {
      */
     setupRecognitionHandlers() {
         this.recognition.onresult = (event) => {
-            const result = event.results[0];
-            if (result.isFinal) {
-                const transcript = result[0].transcript.trim();
-                console.log('Speech recognized:', transcript);
-                if (this.onResult) {
-                    this.onResult(transcript);
+            const result = event.results[event.results.length - 1];
+            const transcript = result[0].transcript.trim();
+
+            // Handle interim results for fast interruption
+            if (!result.isFinal) {
+                // Only process meaningful input
+                if (transcript.length < 2) {
+                    return;
                 }
+
+                // Filter interim result - only stop AI if it's real user input, not self-hearing
+                const cleanedInterim = this.filterSelfHearing(transcript);
+                if (cleanedInterim && this.isSpeaking) {
+                    console.log('Interim result detected (user input), stopping AI:', cleanedInterim);
+                    this.stopSpeaking();
+                } else if (!cleanedInterim) {
+                    console.log('Interim result filtered (self-hearing):', transcript);
+                }
+                return;
+            }
+
+            // Final result - process normally
+            console.log('Speech recognized:', transcript);
+
+            // Only process meaningful input (ignore noise/short sounds)
+            if (transcript.length < 2) {
+                return;
+            }
+
+            // Filter out self-hearing words, keep user input
+            const cleanedTranscript = this.filterSelfHearing(transcript);
+            console.log('FINAL RESULT - Original:', transcript, '→ Cleaned:', cleanedTranscript);
+            if (!cleanedTranscript) {
+                console.log('Filtered out self-hearing:', transcript);
+                return;
+            }
+
+            // Stop AI speech if user interrupts with real input
+            if (this.isSpeaking) {
+                this.stopSpeaking();
+            }
+
+            if (this.onResult) {
+                console.log('Sending to onResult:', cleanedTranscript);
+                this.onResult(cleanedTranscript);
             }
         };
+
 
         this.recognition.onstart = () => {
             this.isListening = true;
@@ -59,8 +104,8 @@ class VoiceService {
         this.recognition.onend = () => {
             this.isListening = false;
 
-            // Auto-restart if in continuous mode
-            if (this.continuousMode && !this.isSpeaking) {
+            // Auto-restart if in continuous mode (even during speech for interruption support)
+            if (this.continuousMode) {
                 setTimeout(() => {
                     if (this.continuousMode) {
                         this.startListening();
@@ -99,17 +144,63 @@ class VoiceService {
         // Voices may load asynchronously
         const setVoice = () => {
             const voices = this.synthesis.getVoices();
-            // Prefer a natural-sounding English voice
-            this.voice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Samantha')) ||
-                voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) ||
-                voices.find(v => v.lang.startsWith('en')) ||
-                voices[0];
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+
+            // Check if user has saved preference
+            const savedVoiceName = localStorage.getItem('tts_voice');
+            if (savedVoiceName) {
+                this.voice = voices.find(v => v.name === savedVoiceName);
+            }
+
+            // If no saved preference or saved voice not found, use defaults
+            if (!this.voice) {
+                // Prefer premium/enhanced voices (less robotic)
+                // macOS Premium voices: Karen, Daniel, Moira, Samantha (Enhanced)
+                // Chrome: Google UK English Female/Male are more natural
+                this.voice =
+                    // macOS enhanced voices - Samantha first (user preference)
+                    voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Karen') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Moira') && v.lang.startsWith('en')) ||
+                    // Google voices (Chrome)
+                    voices.find(v => v.name.includes('Google UK English Female')) ||
+                    voices.find(v => v.name.includes('Google UK English Male')) ||
+                    voices.find(v => v.name.includes('Google US English')) ||
+                    // Any English voice
+                    voices.find(v => v.lang.startsWith('en')) ||
+                    voices[0];
+            }
+
+            console.log('Selected voice:', this.voice?.name);
         };
 
         if (this.synthesis.getVoices().length > 0) {
             setVoice();
         } else {
             this.synthesis.onvoiceschanged = setVoice;
+        }
+    }
+
+    /**
+     * Get available voices
+     * @returns {SpeechSynthesisVoice[]} Array of available voices
+     */
+    getAvailableVoices() {
+        return this.synthesis.getVoices();
+    }
+
+    /**
+     * Set voice by name and save preference
+     * @param {string} voiceName - Name of the voice to use
+     */
+    setVoiceByName(voiceName) {
+        const voices = this.synthesis.getVoices();
+        const selectedVoice = voices.find(v => v.name === voiceName);
+        if (selectedVoice) {
+            this.voice = selectedVoice;
+            localStorage.setItem('tts_voice', voiceName);
+            console.log('Voice changed to:', voiceName);
         }
     }
 
@@ -141,12 +232,11 @@ class VoiceService {
         }
 
         try {
-            // Stop any ongoing speech before listening
-            this.stopSpeaking();
             this.recognition.start();
             return true;
         } catch (error) {
             console.error('Failed to start speech recognition:', error);
+            this.continuousMode = false;  // Reset on failure
             return false;
         }
     }
@@ -194,31 +284,37 @@ class VoiceService {
 
         // Clean text for speech (remove markdown, emojis, etc.)
         const cleanText = this.cleanTextForSpeech(text);
+        console.log('TTS - Original:', text, '→ Cleaned:', cleanText);
         if (!cleanText) return;
+
+        // Track sentence being spoken for self-hearing detection
+        const sentence = cleanText.toLowerCase();
+        this.recentSentences.push({
+            text: sentence,
+            timestamp: Date.now()
+        });
+        console.log('Added to recentSentences:', sentence);
+
+        // Clean up old sentences (older than 3 seconds)
+        const now = Date.now();
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 3000);
 
         // Cancel any current speech
         this.synthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.voice = this.voice;
-        utterance.rate = options.rate || 1.1;  // Slightly faster for workout context
-        utterance.pitch = options.pitch || 1.0;
-        utterance.volume = options.volume || 1.0;
+        utterance.rate = this.rate;
+        utterance.pitch = this.pitch;
+        utterance.volume = this.volume;
 
         utterance.onstart = () => {
             this.isSpeaking = true;
-            // Pause listening while speaking to avoid feedback
-            if (this.recognition && this.isListening) {
-                this.recognition.stop();
-            }
+            // Keep listening - we'll filter out self-hearing instead
         };
 
         utterance.onend = () => {
             this.isSpeaking = false;
-            // Resume continuous listening after speaking
-            if (this.continuousMode) {
-                setTimeout(() => this.startListening(), 200);
-            }
         };
 
         utterance.onerror = (event) => {
@@ -240,6 +336,17 @@ class VoiceService {
         if (this.synthesis) {
             this.synthesis.cancel();
             this.isSpeaking = false;
+
+            // Restart recognition to clear audio buffer containing old AI speech
+            if (this.continuousMode && this.isListening) {
+                console.log('Restarting recognition to clear buffer after AI stop');
+                try {
+                    this.recognition.stop();
+                    // Recognition will auto-restart via onend handler
+                } catch (e) {
+                    console.error('Error restarting recognition:', e);
+                }
+            }
         }
     }
 
@@ -249,8 +356,10 @@ class VoiceService {
      */
     cleanTextForSpeech(text) {
         return text
-            // Remove emojis
-            .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '')
+            // Remove emojis - simple approach using common emoji pattern
+            .replace(/[\u{1F000}-\u{1FFFF}]|[\u{2300}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]/gu, '')
+            // Remove variation selectors (emoji modifiers)
+            .replace(/[\uFE0E\uFE0F]/g, '')
             // Remove markdown bold/italic
             .replace(/\*\*(.*?)\*\*/g, '$1')
             .replace(/\*(.*?)\*/g, '$1')
@@ -259,6 +368,79 @@ class VoiceService {
             // Clean up extra whitespace
             .replace(/\s+/g, ' ')
             .trim();
+    }
+
+    /**
+     * Filter out self-hearing words from transcript
+     * Returns cleaned transcript with only user words, or empty string if all self-hearing
+     */
+    filterSelfHearing(transcript) {
+        // Clean up old sentences first
+        const now = Date.now();
+        const beforeCount = this.recentSentences.length;
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 3000);
+        const afterCount = this.recentSentences.length;
+
+        if (beforeCount > afterCount) {
+            console.log(`Expired ${beforeCount - afterCount} sentences from recentSentences`);
+        }
+
+        if (this.recentSentences.length === 0) {
+            console.log('No recent sentences to filter against');
+            return transcript;
+        }
+
+        // Strip punctuation from words for comparison
+        const stripPunctuation = (word) => word.replace(/[.,!?;:]/g, '');
+
+        const heardWords = transcript.toLowerCase().split(/\s+/).map(stripPunctuation);
+
+        // Collect all AI words from recent sentences
+        const allAiWords = [];
+        for (const sentence of this.recentSentences) {
+            const words = sentence.text.split(/\s+/).map(stripPunctuation);
+            allAiWords.push(...words);
+        }
+
+        console.log('Filter debug:', {
+            transcript,
+            recentSentences: this.recentSentences.map(s => s.text),
+            heardWords,
+            allAiWords
+        });
+
+        // Remove AI words from heard words
+        const userWords = heardWords.filter(word => !allAiWords.includes(word));
+
+        console.log('After filtering:', { userWords });
+
+        // If nothing left, it was all self-hearing
+        if (userWords.length === 0) {
+            return '';
+        }
+
+        // Return cleaned transcript with only user words
+        return userWords.join(' ');
+    }
+
+    /**
+     * Get available voices
+     */
+    getAvailableVoices() {
+        return this.synthesis ? this.synthesis.getVoices() : [];
+    }
+
+    /**
+     * Set voice by name
+     */
+    setVoiceByName(voiceName) {
+        const voices = this.getAvailableVoices();
+        const selectedVoice = voices.find(v => v.name === voiceName);
+        if (selectedVoice) {
+            this.voice = selectedVoice;
+            localStorage.setItem('tts_voice', voiceName);
+            console.log('Voice changed to:', voiceName);
+        }
     }
 }
 

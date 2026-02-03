@@ -73,21 +73,21 @@ class ProviderManager {
 
     /**
      * Load the last active provider from storage
-     * @returns {boolean} True if a provider was loaded and connected
+     * @returns {Promise<boolean>} True if a provider was loaded and connected
      */
-    loadSavedProvider() {
+    async loadSavedProvider() {
         const savedName = localStorage.getItem('active_provider');
 
         if (savedName && this.providers[savedName]) {
             this.setActive(savedName);
-            return this.activeProvider.loadCredentials();
+            return await this.activeProvider.loadCredentials();
         }
 
         // Default to first registered provider
         const names = this.getProviderNames();
         if (names.length > 0) {
             this.setActive(names[0]);
-            return this.activeProvider.loadCredentials();
+            return await this.activeProvider.loadCredentials();
         }
 
         return false;

@@ -1,0 +1,121 @@
+/**
+ * Crypto Utilities
+ * Save/load encrypted credentials via server API
+ */
+
+class CryptoUtils {
+    constructor() {
+        this.deviceId = null;
+    }
+
+    /**
+     * Get or generate device ID
+     */
+    getDeviceId() {
+        if (this.deviceId) return this.deviceId;
+
+        // Get or create device ID
+        let deviceId = localStorage.getItem('device_id');
+        if (!deviceId) {
+            deviceId = this.generateDeviceId();
+            localStorage.setItem('device_id', deviceId);
+        }
+
+        this.deviceId = deviceId;
+        return deviceId;
+    }
+
+    /**
+     * Generate unique device ID
+     */
+    generateDeviceId() {
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * Save API key to server (encrypted server-side)
+     */
+    async saveCredentials(provider, apiKey) {
+        try {
+            const response = await fetch('/api/credentials/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceId: this.getDeviceId(),
+                    provider,
+                    apiKey
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save credentials');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Save credentials error:', error);
+            // Fallback to localStorage
+            localStorage.setItem(`${provider}_api_key`, apiKey);
+            return { success: true, fallback: true };
+        }
+    }
+
+    /**
+     * Load API key from server
+     */
+    async loadCredentials(provider) {
+        try {
+            const response = await fetch('/api/credentials/load', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceId: this.getDeviceId(),
+                    provider
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load credentials');
+            }
+
+            const result = await response.json();
+            return result.found ? result.apiKey : null;
+        } catch (error) {
+            console.error('Load credentials error:', error);
+            // Fallback to localStorage
+            return localStorage.getItem(`${provider}_api_key`);
+        }
+    }
+
+    /**
+     * Delete credentials from server
+     */
+    async deleteCredentials(provider) {
+        try {
+            const response = await fetch('/api/credentials/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceId: this.getDeviceId(),
+                    provider
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete credentials');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Delete credentials error:', error);
+            // Fallback to localStorage
+            localStorage.removeItem(`${provider}_api_key`);
+            return { success: true, fallback: true };
+        }
+    }
+}
+
+// Export singleton instance
+const cryptoUtils = new CryptoUtils();

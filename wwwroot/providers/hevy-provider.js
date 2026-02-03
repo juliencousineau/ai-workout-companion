@@ -12,11 +12,11 @@ class HevyProvider extends WorkoutProvider {
     }
 
     /**
-     * Load API key from localStorage
-     * @returns {boolean}
+     * Load API key from server
+     * @returns {Promise<boolean>}
      */
-    loadCredentials() {
-        this.apiKey = localStorage.getItem('hevy_api_key');
+    async loadCredentials() {
+        this.apiKey = await cryptoUtils.loadCredentials('hevy');
         this.connected = !!this.apiKey;
         return this.connected;
     }
@@ -32,7 +32,7 @@ class HevyProvider extends WorkoutProvider {
         }
 
         this.apiKey = credentials.apiKey;
-        localStorage.setItem('hevy_api_key', this.apiKey);
+        await cryptoUtils.saveCredentials('hevy', this.apiKey);
 
         const success = await this.testConnection();
         this.connected = success;
@@ -65,7 +65,7 @@ class HevyProvider extends WorkoutProvider {
     disconnect() {
         this.apiKey = null;
         this.connected = false;
-        localStorage.removeItem('hevy_api_key');
+        cryptoUtils.deleteCredentials('hevy');
     }
 
     /**

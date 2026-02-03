@@ -15,6 +15,8 @@ class WorkoutEngine {
         this.workoutData = null;
         this.timerInterval = null;
         this.timerSeconds = 0;
+        this.restTimerInterval = null;
+        this.lastAIMessage = null;
 
         // Callback for sending messages
         this.onMessage = null;
@@ -23,18 +25,18 @@ class WorkoutEngine {
     // Motivational messages pool
     motivationalMessages = {
         repStart: [
-            "💪 Let's go!",
-            "🔥 You got this!",
-            "⚡ Power up!",
-            "🎯 Focus!",
+            "Let's go!",
+            "You got this!",
+            "Power up!",
+            "Focus!",
         ],
         repComplete: [
-            "Strong start! 💪",
+            "Strong start!",
             "Keep pushing!",
             "Nice and controlled!",
             "You're in the zone!",
             "Great form!",
-            "Beast mode! 🔥",
+            "Beast mode!",
             "Crushing it!",
             "That's the way!",
         ],
@@ -49,18 +51,18 @@ class WorkoutEngine {
             "Final push! You've got this!",
         ],
         setComplete: [
-            "🎉 Set complete! Great work!",
-            "💪 Solid set! Rest up.",
-            "🔥 Crushed that set!",
-            "⭐ Excellent work!",
+            "Set complete! Great work!",
+            "Solid set! Rest up.",
+            "Crushed that set!",
+            "Excellent work!",
         ],
         exerciseComplete: [
-            "🏆 Exercise complete! You crushed it!",
-            "💪 Awesome job on that exercise!",
-            "🎉 Done with that one! Great effort!",
+            "Exercise complete! You crushed it!",
+            "Awesome job on that exercise!",
+            "Done with that one! Great effort!",
         ],
         timerHalfway: [
-            "Halfway there! Stay tight! 💪",
+            "Halfway there! Stay tight!",
             "50% done! Keep holding!",
         ],
         timer30sec: [
@@ -100,7 +102,7 @@ class WorkoutEngine {
 
         // Send welcome message
         const exercise = this.getCurrentExercise();
-        this.sendAIMessage(`🔥 Starting "${this.workoutData.title}" workout!`);
+        this.sendAIMessage(`Starting "${this.workoutData.title}" workout!`);
 
         setTimeout(() => {
             this.announceExercise(exercise);
@@ -130,23 +132,25 @@ class WorkoutEngine {
         if (!exercise) return;
 
         const sets = exercise.sets?.length || 3;
-        const isTimedExercise = exercise.exercise_type === 'duration' ||
-            exercise.superset_id?.includes('duration') ||
-            exercise.duration_seconds > 0;
 
-        let message = `🔥 Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
+        // Check if duration is specified in the first set (from API)
+        const firstSetDuration = exercise.sets?.[0]?.duration_seconds || 0;
+
+        // Detect timed exercises using ONLY API data (no hardcoded names)
+        const isTimedExercise = firstSetDuration > 0;
+
+        let message = `Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
 
         if (isTimedExercise) {
-            const duration = exercise.duration_seconds || 60;
+            const duration = exercise.duration_seconds || firstSetDuration || 30;
             message += ` (${sets} sets × ${duration} seconds).\n`;
-            message += `This is a timed exercise - I'll count down for you!\n`;
-            message += `Ready for Set 1?`;
+            message += `Ready for Set 1? Say 'yes', 'go', or 'start the set'!`;
             this.isCountdown = true;
             this.timerSeconds = duration;
         } else {
             const reps = exercise.reps || 10;
             message += ` (${sets} sets × ${reps} reps).\n`;
-            message += `Tell me after each rep - I'll count down with you!`;
+            message += `Ready for Set 1? Say 'yes' or 'go'!`;
             this.isCountdown = false;
             this.targetReps = reps;
             this.currentRep = 0;
@@ -167,16 +171,34 @@ class WorkoutEngine {
         }
 
         // Check for set start (for timed exercises)
-        if (normalizedInput === 'yes' || normalizedInput === 'ready' || normalizedInput === 'go' || normalizedInput === 'start') {
+        if (normalizedInput === 'yes' || normalizedInput === 'ready' || normalizedInput === 'go' || normalizedInput === 'start' || normalizedInput === 'start the set') {
             if (this.isCountdown) {
                 return this.startTimer();
             }
-            return this.sendAIMessage("Let's go! Tell me your rep count.");
+            return this.sendAIMessage("Let's go! Tell me after each rep - I'll count down with you!.");
+        }
+
+        // Check for repeat request
+        if (normalizedInput === 'what' || normalizedInput === 'repeat' || normalizedInput === 'say that again') {
+            if (this.lastAIMessage) {
+                return this.sendAIMessage(this.lastAIMessage);
+            }
+            return this.sendAIMessage("I haven't said anything yet!");
         }
 
         // Check for skip
         if (normalizedInput === 'skip' || normalizedInput === 'next exercise') {
             return this.skipExercise();
+        }
+
+        // Check for exercise instructions
+        if (normalizedInput.includes('how') || normalizedInput === 'instructions' || normalizedInput === 'help') {
+            const exercise = this.getCurrentExercise();
+            if (exercise?.notes) {
+                return this.sendAIMessage(`Here's how to do ${exercise.title}: ${exercise.notes}`);
+            } else {
+                return this.sendAIMessage(`I don't have specific instructions for this exercise.`);
+            }
         }
 
         // Convert spoken word numbers to digits
@@ -188,29 +210,53 @@ class WorkoutEngine {
             return this.handleRepInput(repNumbers);
         }
 
-        // Default response
-        this.sendAIMessage("Tell me your rep number, 'done' when finished with the set, or 'skip' to move on.");
+        // Default response - repeat last message instead of generic prompt
+        if (this.lastAIMessage) {
+            this.sendAIMessage(this.lastAIMessage);
+        }
     }
 
     /**
      * Convert spoken word numbers to digits
-     * e.g., "one" -> "1", "two" -> "2"
+     * Includes phonetic near-matches for common speech recognition errors
+     * e.g., "one" -> "1", "tree" -> "3"
      */
     convertWordsToNumbers(input) {
         const wordToNumber = {
-            'zero': '0',
-            'one': '1',
-            'two': '2', 'to': '2', 'too': '2',
-            'three': '3',
-            'four': '4', 'for': '4',
-            'five': '5',
-            'six': '6',
-            'seven': '7',
-            'eight': '8',
-            'nine': '9',
-            'ten': '10',
-            'eleven': '11',
-            'twelve': '12',
+            // Zero
+            'zero': '0', 'oh': '0',
+
+            // One
+            'one': '1', 'won': '1', 'wan': '1',
+
+            // Two
+            'two': '2', 'to': '2', 'too': '2', 'tu': '2',
+
+            // Three - common mishearing
+            'three': '3', 'tree': '3', 'free': '3', 'thee': '3',
+
+            // Four
+            'four': '4', 'for': '4', 'fore': '4', 'floor': '4',
+
+            // Five
+            'five': '5', 'fife': '5', 'hive': '5',
+
+            // Six
+            'six': '6', 'sex': '6', 'sicks': '6',
+
+            // Seven
+            'seven': '7', 'sven': '7',
+
+            // Eight
+            'eight': '8', 'ate': '8', 'ait': '8',
+
+            // Nine
+            'nine': '9', 'nein': '9', 'mine': '9',
+
+            // Ten and above
+            'ten': '10', 'tin': '10',
+            'eleven': '11', 'leaven': '11',
+            'twelve': '12', 'twelfth': '12',
             'thirteen': '13',
             'fourteen': '14',
             'fifteen': '15',
@@ -232,6 +278,7 @@ class WorkoutEngine {
 
     /**
      * Handle rep input from user
+     * Uses the actual spoken number as the current rep (smart sequencing)
      */
     handleRepInput(repNumbers) {
         const exercise = this.getCurrentExercise();
@@ -240,8 +287,29 @@ class WorkoutEngine {
         const targetReps = exercise.reps || 10;
         let messages = [];
 
-        for (const repNum of repNumbers) {
-            this.currentRep++;
+        // Deduplicate repeated numbers (e.g., "two two" -> just "2")
+        const uniqueReps = [...new Set(repNumbers)];
+
+        for (const repNumStr of uniqueReps) {
+            const spokenRep = parseInt(repNumStr, 10);
+
+            // Only process if the spoken number advances the count
+            // Saying "four" twice should NOT keep counting up
+            if (spokenRep > this.currentRep && spokenRep <= targetReps) {
+                this.currentRep = spokenRep;
+            } else if (spokenRep === this.currentRep) {
+                // Same number repeated - re-announce current state
+                const repsRemaining = targetReps - this.currentRep;
+                messages.push(`${repsRemaining} ✓ ${this.getMotivation('repComplete')}`);
+                continue;
+            } else if (spokenRep < this.currentRep) {
+                // Number lower than current - ignore (probably heard old audio)
+                continue;
+            } else {
+                // Number higher than target - ignore
+                continue;
+            }
+
             const repsRemaining = targetReps - this.currentRep;
 
             let motivation = this.getMotivation('repComplete');
@@ -273,7 +341,12 @@ class WorkoutEngine {
                 messages.push(this.getMotivation('exerciseComplete'));
                 this.moveToNextExercise();
             } else {
-                messages.push(`Rest up. Ready for Set ${this.currentSetIndex + 1}?`);
+                // Start rest timer if rest_seconds is defined
+                const restSeconds = exercise.rest_seconds || 60;
+                messages.push(`Rest for ${restSeconds} seconds...`);
+                this.sendAIMessage(messages.join('\n'));
+                this.startRestTimer(restSeconds, this.currentSetIndex + 1);
+                return; // Exit early, rest timer will handle the next message
             }
         }
 
@@ -298,12 +371,40 @@ class WorkoutEngine {
             // Done with current set, not all sets
             this.currentSetIndex++;
             this.currentRep = 0;
-            this.sendAIMessage(`${this.getMotivation('setComplete')}\nReady for Set ${this.currentSetIndex + 1}?`);
+            const exercise = this.getCurrentExercise();
+            const restSeconds = exercise.rest_seconds || 60;
+            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
+            this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         } else {
             // Done with exercise
             this.sendAIMessage(this.getMotivation('exerciseComplete'));
             this.moveToNextExercise();
         }
+    }
+
+    /**
+     * Start rest timer countdown between sets
+     */
+    startRestTimer(duration, nextSetNumber) {
+        let remaining = duration;
+
+        // Clear any existing rest timer
+        if (this.restTimerInterval) {
+            clearInterval(this.restTimerInterval);
+        }
+
+        this.restTimerInterval = setInterval(() => {
+            remaining--;
+
+            // Announce every 10 seconds
+            if (remaining > 0 && remaining % 10 === 0) {
+                this.sendAIMessage(`${remaining} seconds...`);
+            } else if (remaining === 0) {
+                clearInterval(this.restTimerInterval);
+                this.restTimerInterval = null;
+                this.sendAIMessage(`Rest over! Ready for Set ${nextSetNumber}? Say 'yes' or 'go'!`);
+            }
+        }, 1000);
     }
 
     /**
@@ -318,13 +419,9 @@ class WorkoutEngine {
         this.timerInterval = setInterval(() => {
             remaining--;
 
-            // Milestone announcements
-            if (remaining === Math.floor(duration / 2)) {
-                this.sendAIMessage(this.getMotivation('timerHalfway'));
-            } else if (remaining === 30 && duration > 45) {
-                this.sendAIMessage(this.getMotivation('timer30sec'));
-            } else if (remaining === 15) {
-                this.sendAIMessage(this.getMotivation('timer15sec'));
+            // Announce every 10 seconds
+            if (remaining > 0 && remaining % 10 === 0) {
+                this.sendAIMessage(`${remaining} seconds...`);
             } else if (remaining === 0) {
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
@@ -347,7 +444,10 @@ class WorkoutEngine {
             this.sendAIMessage(`${this.getMotivation('setComplete')}\n${this.getMotivation('exerciseComplete')}`);
             this.moveToNextExercise();
         } else {
-            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest up. Ready for Set ${this.currentSetIndex + 1}?`);
+            // Start rest timer between sets
+            const restSeconds = exercise?.rest_seconds || exercise?.sets?.[this.currentSetIndex]?.rest_seconds || 60;
+            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
+            this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         }
     }
 
@@ -406,7 +506,7 @@ class WorkoutEngine {
      * Skip current exercise
      */
     skipExercise() {
-        this.sendAIMessage("⏭️ Skipping to next exercise...");
+        this.sendAIMessage("Skipping to next exercise...");
         this.moveToNextExercise();
     }
 
@@ -423,7 +523,7 @@ class WorkoutEngine {
         const duration = Math.round((new Date() - this.workoutStartTime) / 1000 / 60);
         const totalSets = this.workoutData.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 
-        this.sendAIMessage(`🎉 **Workout Complete!**\n\n` +
+        this.sendAIMessage(`**Workout Complete!**\n\n` +
             `⏱️ Duration: ${duration} minutes\n` +
             `🏋️ Exercises: ${this.workoutData.exercises.length}\n` +
             `📊 Total Sets: ${totalSets}\n\n` +
@@ -440,6 +540,7 @@ class WorkoutEngine {
      */
     sendAIMessage(content) {
         if (this.onMessage) {
+            this.lastAIMessage = content;
             this.onMessage('ai', content);
         }
     }

@@ -6,6 +6,7 @@ class App {
     constructor() {
         this.screens = {
             setup: document.getElementById('setupScreen'),
+            voiceSettings: document.getElementById('voiceSettingsScreen'),
             workoutSelect: document.getElementById('workoutSelectScreen'),
             chat: document.getElementById('chatScreen'),
             complete: document.getElementById('completeScreen')
@@ -25,7 +26,22 @@ class App {
             sendBtn: document.getElementById('sendBtn'),
             voiceBtn: document.getElementById('voiceBtn'),
             workoutSummary: document.getElementById('workoutSummary'),
-            newWorkoutBtn: document.getElementById('newWorkoutBtn')
+            newWorkoutBtn: document.getElementById('newWorkoutBtn'),
+            disconnectBtn: document.getElementById('disconnectBtn'),
+            providerSelectView: document.getElementById('providerSelectView'),
+            connectionFormView: document.getElementById('connectionFormView'),
+            backToProvidersBtn: document.getElementById('backToProvidersBtn'),
+            providerCards: document.querySelectorAll('.provider-card:not(.disabled)'),
+            voiceSettingsLink: document.getElementById('voiceSettingsLink'),
+            backFromVoiceSettingsBtn: document.getElementById('backFromVoiceSettingsBtn'),
+            voiceSelect: document.getElementById('voiceSelect'),
+            pitchSlider: document.getElementById('pitchSlider'),
+            pitchValue: document.getElementById('pitchValue'),
+            rateSlider: document.getElementById('rateSlider'),
+            rateValue: document.getElementById('rateValue'),
+            volumeSlider: document.getElementById('volumeSlider'),
+            volumeValue: document.getElementById('volumeValue'),
+            testVoiceBtn: document.getElementById('testVoiceBtn')
         };
 
         this.selectedRoutine = null;
@@ -41,9 +57,11 @@ class App {
         this.bindEvents();
         this.setupWorkoutEngine();
         this.setupVoiceService();
+        this.populateVoiceSelector();
+        this.loadVoiceSettings();
 
         // Check for saved provider credentials
-        const hasCredentials = providerManager.loadSavedProvider();
+        const hasCredentials = await providerManager.loadSavedProvider();
         if (hasCredentials) {
             this.elements.apiKeyInput.value = '••••••••••••••••';
             await this.testConnection();
@@ -79,6 +97,58 @@ class App {
 
         // New workout button
         this.elements.newWorkoutBtn.addEventListener('click', () => this.showScreen('workoutSelect'));
+
+        // Disconnect button
+        this.elements.disconnectBtn.addEventListener('click', () => this.handleDisconnect());
+
+        // Provider cards
+        this.elements.providerCards.forEach(card => {
+            card.addEventListener('click', () => this.selectProvider(card.dataset.provider));
+        });
+
+        // Back to providers button
+        this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
+
+        // Voice settings link
+        this.elements.voiceSettingsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showScreen('voiceSettings');
+        });
+
+        // Back from voice settings
+        this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => this.showScreen('setup'));
+
+        // Voice selector
+        this.elements.voiceSelect.addEventListener('change', (e) => this.handleVoiceChange(e.target.value));
+
+        // Pitch slider
+        this.elements.pitchSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.pitchValue.textContent = value.toFixed(2);
+            voiceService.pitch = value;
+            localStorage.setItem('tts_pitch', value);
+        });
+
+        // Rate slider
+        this.elements.rateSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.rateValue.textContent = value.toFixed(1);
+            voiceService.rate = value;
+            localStorage.setItem('tts_rate', value);
+        });
+
+        // Volume slider
+        this.elements.volumeSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.volumeValue.textContent = value.toFixed(1);
+            voiceService.volume = value;
+            localStorage.setItem('tts_volume', value);
+        });
+
+        // Test voice button
+        this.elements.testVoiceBtn.addEventListener('click', () => {
+            voiceService.speak('This is a test of your voice settings. How does it sound?');
+        });
     }
 
     /**
@@ -113,7 +183,22 @@ class App {
 
         // Handle speech recognition results
         voiceService.onResult = (transcript) => {
-            this.addMessage('user', transcript);
+            // Convert word numbers to digits for display
+            let convertedTranscript = workoutEngine.convertWordsToNumbers(transcript.toLowerCase().trim());
+
+            // Deduplicate repeated numbers (e.g., "10 10" -> "10")
+            const parts = convertedTranscript.split(/\s+/);
+            const deduplicatedParts = [];
+            let lastPart = null;
+            for (const part of parts) {
+                if (part !== lastPart) {
+                    deduplicatedParts.push(part);
+                    lastPart = part;
+                }
+            }
+            convertedTranscript = deduplicatedParts.join(' ');
+
+            this.addMessage('user', convertedTranscript);
             workoutEngine.processInput(transcript);
             this.updateProgressDisplay();
         };
@@ -136,6 +221,70 @@ class App {
                 this.elements.voiceBtn.classList.remove('listening');
             }
         };
+    }
+
+    /**
+     * Populate voice selector dropdown
+     */
+    populateVoiceSelector() {
+        // Wait for voices to load
+        const populate = () => {
+            const voices = voiceService.getAvailableVoices();
+            if (voices.length === 0) {
+                // Voices not loaded yet, try again
+                setTimeout(populate, 100);
+                return;
+            }
+
+            // Clear and populate dropdown
+            this.elements.voiceSelect.innerHTML = '';
+
+            // Get current voice name
+            const savedVoiceName = localStorage.getItem('tts_voice') || voiceService.voice?.name;
+
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.name === savedVoiceName) {
+                    option.selected = true;
+                }
+                this.elements.voiceSelect.appendChild(option);
+            });
+        };
+
+        // Wait a bit for voice service to initialize
+        setTimeout(populate, 250);
+    }
+
+    /**
+     * Handle voice selection change
+     */
+    handleVoiceChange(voiceName) {
+        voiceService.setVoiceByName(voiceName);
+    }
+
+    /**
+     * Load saved voice settings from localStorage
+     */
+    loadVoiceSettings() {
+        // Load pitch
+        const savedPitch = parseFloat(localStorage.getItem('tts_pitch') || '1.05');
+        this.elements.pitchSlider.value = savedPitch;
+        this.elements.pitchValue.textContent = savedPitch.toFixed(2);
+        voiceService.pitch = savedPitch;
+
+        // Load rate
+        const savedRate = parseFloat(localStorage.getItem('tts_rate') || '1.2');
+        this.elements.rateSlider.value = savedRate;
+        this.elements.rateValue.textContent = savedRate.toFixed(1);
+        voiceService.rate = savedRate;
+
+        // Load volume
+        const savedVolume = parseFloat(localStorage.getItem('tts_volume') || '1.0');
+        this.elements.volumeSlider.value = savedVolume;
+        this.elements.volumeValue.textContent = savedVolume.toFixed(1);
+        voiceService.volume = savedVolume;
     }
 
     /**
@@ -216,17 +365,60 @@ class App {
      */
     updateConnectionStatus(connected) {
         const dot = this.elements.connectionStatus.querySelector('.status-dot');
-        const text = this.elements.connectionStatus.querySelector('span:last-child');
+        const text = this.elements.connectionStatus.querySelector('span:not(.status-dot):not(button)');
 
         if (connected) {
             dot.classList.remove('disconnected');
             dot.classList.add('connected');
             text.textContent = 'Connected';
+            this.elements.disconnectBtn.style.display = 'inline-block';
         } else {
             dot.classList.remove('connected');
             dot.classList.add('disconnected');
             text.textContent = 'Not Connected';
+            this.elements.disconnectBtn.style.display = 'none';
         }
+    }
+
+    /**
+     * Handle disconnect button click
+     */
+    handleDisconnect() {
+        const provider = providerManager.getActive();
+        if (provider) {
+            provider.disconnect();
+        }
+
+        // Clear API key input
+        this.elements.apiKeyInput.value = '';
+
+        // Reset connect button
+        this.elements.connectBtn.textContent = 'Connect';
+        this.elements.connectBtn.disabled = false;
+
+        // Update status and go to setup screen
+        this.updateConnectionStatus(false);
+        this.showProviderSelect();
+        this.showScreen('setup');
+    }
+
+    /**
+     * Select a provider and show its connection form
+     */
+    selectProvider(providerName) {
+        providerManager.setActive(providerName);
+
+        // Show connection form
+        this.elements.providerSelectView.style.display = 'none';
+        this.elements.connectionFormView.style.display = 'flex';
+    }
+
+    /**
+     * Show provider selection view
+     */
+    showProviderSelect() {
+        this.elements.providerSelectView.style.display = 'flex';
+        this.elements.connectionFormView.style.display = 'none';
     }
 
     /**
@@ -326,6 +518,12 @@ class App {
 
         // Update progress display
         this.updateProgressDisplay();
+
+        // Auto-start listening immediately (user already clicked so permissions should work)
+        if (!voiceService.continuousMode) {
+            voiceService.startContinuousListening();
+            this.elements.voiceBtn.classList.add('listening');
+        }
     }
 
     /**

@@ -20,6 +20,8 @@
                 <div class="connection-status" id="connectionStatus">
                     <span class="status-dot disconnected"></span>
                     <span>Not Connected</span>
+                    <button id="disconnectBtn" class="btn-disconnect" title="Disconnect"
+                        style="display: none;">✕</button>
                 </div>
             </div>
         </header>
@@ -28,18 +30,93 @@
         <main class="main-content">
             <!-- Setup Screen -->
             <div id="setupScreen" class="screen active">
-                <div class="setup-card">
-                    <div class="setup-icon">🔑</div>
-                    <h2>Connect to Hevy</h2>
-                    <p>Enter your Hevy API key to get started. You can find it at:</p>
-                    <a href="https://hevy.com/settings?developer" target="_blank" class="hevy-link">
-                        hevy.com/settings → Developer
-                    </a>
-                    <div class="input-group">
-                        <input type="password" id="apiKeyInput" placeholder="Enter your API key" class="api-input">
-                        <button id="connectBtn" class="btn btn-primary">Connect</button>
+                <!-- Provider Selection View -->
+                <div id="providerSelectView" class="setup-view">
+                    <h2 class="setup-title">Choose a Workout App</h2>
+                    <div class="provider-list">
+                        <div class="provider-card" data-provider="hevy">
+                            <div class="provider-icon">🟠</div>
+                            <div class="provider-info">
+                                <h3>Hevy</h3>
+                                <p>Sync your workouts and routines</p>
+                            </div>
+                            <span class="provider-arrow">→</span>
+                        </div>
+                        <div class="provider-card disabled" data-provider="strong">
+                            <div class="provider-icon">🔵</div>
+                            <div class="provider-info">
+                                <h3>Strong</h3>
+                                <p>Coming soon</p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="note">Requires Hevy Pro subscription</p>
+                    <!-- Voice Settings Link -->
+                    <div class="voice-settings-link-section">
+                        <a href="#" id="voiceSettingsLink" class="voice-settings-link">⚙️ Voice Settings</a>
+                    </div>
+                </div>
+
+                <!-- Connection Form View -->
+                <div id="connectionFormView" class="setup-view" style="display: none;">
+                    <button id="backToProvidersBtn" class="btn-back">← Back</button>
+                    <div class="setup-card">
+                        <div class="setup-icon" id="providerFormIcon">🔑</div>
+                        <h2 id="providerFormTitle">Connect to Hevy</h2>
+                        <p id="providerFormDescription">Enter your Hevy API key to get started. You can find it at:</p>
+                        <a href="https://hevy.com/settings?developer" target="_blank" class="hevy-link"
+                            id="providerFormLink">
+                            hevy.com/settings → Developer
+                        </a>
+                        <div class="input-group">
+                            <input type="password" id="apiKeyInput" placeholder="Enter your API key" class="api-input">
+                            <button id="connectBtn" class="btn btn-primary">Connect</button>
+                        </div>
+                        <p class="note" id="providerFormNote">Requires Hevy Pro subscription</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Settings Screen -->
+            <div id="voiceSettingsScreen" class="screen">
+                <div class="voice-settings-card">
+                    <button id="backFromVoiceSettingsBtn" class="btn-back">← Back</button>
+                    <h2 class="voice-settings-title">Voice Settings</h2>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">Voice</label>
+                        <select id="voiceSelect" class="voice-select">
+                            <option value="">Loading voices...</option>
+                        </select>
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Pitch
+                            <span class="voice-setting-value" id="pitchValue">1.05</span>
+                        </label>
+                        <input type="range" id="pitchSlider" class="voice-slider" min="0.5" max="2" step="0.05"
+                            value="1.05">
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Rate
+                            <span class="voice-setting-value" id="rateValue">1.2</span>
+                        </label>
+                        <input type="range" id="rateSlider" class="voice-slider" min="0.5" max="2" step="0.1"
+                            value="1.2">
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Volume
+                            <span class="voice-setting-value" id="volumeValue">1.0</span>
+                        </label>
+                        <input type="range" id="volumeSlider" class="voice-slider" min="0" max="1" step="0.1"
+                            value="1.0">
+                    </div>
+
+                    <button id="testVoiceBtn" class="btn btn-primary btn-large">Test Voice</button>
                 </div>
             </div>
 
@@ -110,6 +187,7 @@
         </main>
     </div>
 
+    <script src="crypto-utils.js"></script>
     <script src="providers/provider-interface.js"></script>
     <script src="providers/provider-manager.js"></script>
     <script src="providers/hevy-provider.js"></script>
