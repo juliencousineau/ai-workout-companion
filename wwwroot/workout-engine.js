@@ -144,7 +144,7 @@ class WorkoutEngine {
         if (isTimedExercise) {
             const duration = exercise.duration_seconds || firstSetDuration || 30;
             message += ` (${sets} sets × ${duration} seconds).\n`;
-            message += `Ready for Set 1? Say 'yes' or 'start the timer'!`;
+            message += `Ready for Set 1? Say 'yes' or 'start the set'!`;
             this.isCountdown = true;
             this.timerSeconds = duration;
         } else {
@@ -171,7 +171,7 @@ class WorkoutEngine {
         }
 
         // Check for set start (for timed exercises)
-        if (normalizedInput === 'yes' || normalizedInput === 'ready' || normalizedInput === 'go' || normalizedInput === 'start') {
+        if (normalizedInput === 'yes' || normalizedInput === 'ready' || normalizedInput === 'go' || normalizedInput === 'start' || normalizedInput === 'start the set') {
             if (this.isCountdown) {
                 return this.startTimer();
             }
