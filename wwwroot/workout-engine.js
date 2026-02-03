@@ -144,7 +144,7 @@ class WorkoutEngine {
         if (isTimedExercise) {
             const duration = exercise.duration_seconds || firstSetDuration || 30;
             message += ` (${sets} sets × ${duration} seconds).\n`;
-            message += `Ready for Set 1? Say 'yes' or 'start the set'!`;
+            message += `Ready for Set 1? Say 'yes', 'go', or 'start the set'!`;
             this.isCountdown = true;
             this.timerSeconds = duration;
         } else {
@@ -402,7 +402,7 @@ class WorkoutEngine {
             } else if (remaining === 0) {
                 clearInterval(this.restTimerInterval);
                 this.restTimerInterval = null;
-                this.sendAIMessage(`Rest over! Ready for Set ${nextSetNumber}?`);
+                this.sendAIMessage(`Rest over! Ready for Set ${nextSetNumber}? Say 'yes' or 'go'!`);
             }
         }, 1000);
     }
