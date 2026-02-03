@@ -180,30 +180,37 @@ body {
 .guest-badge {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-xs) var(--space-md);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-full);
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
     font-size: 0.875rem;
-    color: var(--text-secondary);
 }
 
-.btn-sign-out-small {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.guest-text {
     color: var(--text-secondary);
-    padding: 4px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
     cursor: pointer;
     transition: all var(--transition-fast);
+    line-height: 1;
 }
 
-.btn-sign-out-small:hover {
-    background: var(--accent-danger);
-    border-color: var(--accent-danger);
-    color: white;
+.btn-icon:hover {
+    color: var(--accent-danger);
+    transform: scale(1.1);
 }
 
 #signedOutView {
