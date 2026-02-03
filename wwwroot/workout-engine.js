@@ -178,6 +178,14 @@ class WorkoutEngine {
             return this.sendAIMessage("Let's go! Tell me your rep count.");
         }
 
+        // Check for repeat request
+        if (normalizedInput === 'what' || normalizedInput === 'repeat' || normalizedInput === 'say that again') {
+            if (this.lastAIMessage) {
+                return this.sendAIMessage(this.lastAIMessage);
+            }
+            return this.sendAIMessage("I haven't said anything yet!");
+        }
+
         // Check for skip
         if (normalizedInput === 'skip' || normalizedInput === 'next exercise') {
             return this.skipExercise();
