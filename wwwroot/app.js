@@ -30,7 +30,8 @@ class App {
             providerSelectView: document.getElementById('providerSelectView'),
             connectionFormView: document.getElementById('connectionFormView'),
             backToProvidersBtn: document.getElementById('backToProvidersBtn'),
-            providerCards: document.querySelectorAll('.provider-card:not(.disabled)')
+            providerCards: document.querySelectorAll('.provider-card:not(.disabled)'),
+            voiceSelect: document.getElementById('voiceSelect')
         };
 
         this.selectedRoutine = null;
@@ -46,6 +47,7 @@ class App {
         this.bindEvents();
         this.setupWorkoutEngine();
         this.setupVoiceService();
+        this.populateVoiceSelector();
 
         // Check for saved provider credentials
         const hasCredentials = providerManager.loadSavedProvider();
@@ -95,6 +97,9 @@ class App {
 
         // Back to providers button
         this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
+
+        // Voice selector
+        this.elements.voiceSelect.addEventListener('change', (e) => this.handleVoiceChange(e.target.value));
     }
 
     /**
@@ -167,6 +172,47 @@ class App {
                 this.elements.voiceBtn.classList.remove('listening');
             }
         };
+    }
+
+    /**
+     * Populate voice selector dropdown
+     */
+    populateVoiceSelector() {
+        // Wait for voices to load
+        const populate = () => {
+            const voices = voiceService.getAvailableVoices();
+            if (voices.length === 0) {
+                // Voices not loaded yet, try again
+                setTimeout(populate, 100);
+                return;
+            }
+
+            // Clear and populate dropdown
+            this.elements.voiceSelect.innerHTML = '';
+            
+            // Get current voice name
+            const savedVoiceName = localStorage.getItem('tts_voice') || voiceService.voice?.name;
+
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.name === savedVoiceName) {
+                    option.selected = true;
+                }
+                this.elements.voiceSelect.appendChild(option);
+            });
+        };
+
+        // Wait a bit for voice service to initialize
+        setTimeout(populate, 250);
+    }
+
+    /**
+     * Handle voice selection change
+     */
+    handleVoiceChange(voiceName) {
+        voiceService.setVoiceByName(voiceName);
     }
 
     /**

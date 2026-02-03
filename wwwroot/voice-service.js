@@ -141,22 +141,31 @@ class VoiceService {
             const voices = this.synthesis.getVoices();
             console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
 
-            // Prefer premium/enhanced voices (less robotic)
-            // macOS Premium voices: Karen, Daniel, Moira, Samantha (Enhanced)
-            // Chrome: Google UK English Female/Male are more natural
-            this.voice =
-                // macOS enhanced voices
-                voices.find(v => v.name.includes('Karen') && v.lang.startsWith('en')) ||
-                voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
-                voices.find(v => v.name.includes('Moira') && v.lang.startsWith('en')) ||
-                voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
-                // Google voices (Chrome)
-                voices.find(v => v.name.includes('Google UK English Female')) ||
-                voices.find(v => v.name.includes('Google UK English Male')) ||
-                voices.find(v => v.name.includes('Google US English')) ||
-                // Any English voice
-                voices.find(v => v.lang.startsWith('en')) ||
-                voices[0];
+            // Check if user has saved preference
+            const savedVoiceName = localStorage.getItem('tts_voice');
+            if (savedVoiceName) {
+                this.voice = voices.find(v => v.name === savedVoiceName);
+            }
+
+            // If no saved preference or saved voice not found, use defaults
+            if (!this.voice) {
+                // Prefer premium/enhanced voices (less robotic)
+                // macOS Premium voices: Karen, Daniel, Moira, Samantha (Enhanced)
+                // Chrome: Google UK English Female/Male are more natural
+                this.voice =
+                    // macOS enhanced voices
+                    voices.find(v => v.name.includes('Karen') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Moira') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
+                    // Google voices (Chrome)
+                    voices.find(v => v.name.includes('Google UK English Female')) ||
+                    voices.find(v => v.name.includes('Google UK English Male')) ||
+                    voices.find(v => v.name.includes('Google US English')) ||
+                    // Any English voice
+                    voices.find(v => v.lang.startsWith('en')) ||
+                    voices[0];
+            }
 
             console.log('Selected voice:', this.voice?.name);
         };
@@ -165,6 +174,28 @@ class VoiceService {
             setVoice();
         } else {
             this.synthesis.onvoiceschanged = setVoice;
+        }
+    }
+
+    /**
+     * Get available voices
+     * @returns {SpeechSynthesisVoice[]} Array of available voices
+     */
+    getAvailableVoices() {
+        return this.synthesis.getVoices();
+    }
+
+    /**
+     * Set voice by name and save preference
+     * @param {string} voiceName - Name of the voice to use
+     */
+    setVoiceByName(voiceName) {
+        const voices = this.synthesis.getVoices();
+        const selectedVoice = voices.find(v => v.name === voiceName);
+        if (selectedVoice) {
+            this.voice = selectedVoice;
+            localStorage.setItem('tts_voice', voiceName);
+            console.log('Voice changed to:', voiceName);
         }
     }
 
