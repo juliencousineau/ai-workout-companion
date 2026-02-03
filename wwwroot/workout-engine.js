@@ -16,6 +16,7 @@ class WorkoutEngine {
         this.timerInterval = null;
         this.timerSeconds = 0;
         this.restTimerInterval = null;
+        this.lastAIMessage = null;
 
         // Callback for sending messages
         this.onMessage = null;
@@ -189,8 +190,10 @@ class WorkoutEngine {
             return this.handleRepInput(repNumbers);
         }
 
-        // Default response
-        this.sendAIMessage("Tell me your rep number, 'done' when finished with the set, or 'skip' to move on.");
+        // Default response - repeat last message instead of generic prompt
+        if (this.lastAIMessage) {
+            this.sendAIMessage(this.lastAIMessage);
+        }
     }
 
     /**
@@ -518,6 +521,7 @@ class WorkoutEngine {
      */
     sendAIMessage(content) {
         if (this.onMessage) {
+            this.lastAIMessage = content;
             this.onMessage('ai', content);
         }
     }
