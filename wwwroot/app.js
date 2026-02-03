@@ -94,9 +94,6 @@ class App {
         window.addEventListener('auth:signed-in', (e) => this.handleSignIn(e.detail));
         window.addEventListener('auth:signed-out', () => this.handleSignOut());
 
-        // Initialize Google Sign-In (optional - may not be configured)
-        const clientId = ''; // Empty = no Google OAuth configured
-
         // Check if already authenticated
         if (authService.isAuthenticated()) {
             this.showUserProfile(authService.getUser());
@@ -112,6 +109,18 @@ class App {
 
         // Show welcome screen for auth selection
         this.showScreen('welcome');
+
+        // Fetch Google Client ID from backend configuration
+        let clientId = '';
+        try {
+            const response = await fetch('/api/config');
+            if (response.ok) {
+                const config = await response.json();
+                clientId = config.googleClientId || '';
+            }
+        } catch (error) {
+            console.warn('Failed to fetch config:', error);
+        }
 
         // Only initialize Google if Client ID is configured
         if (clientId) {
@@ -231,8 +240,9 @@ class App {
             authService.signOut();
         });
 
-        // Continue as guest button
-        this.elements.continueAsGuestBtn.addEventListener('click', () => {
+        // Continue as guest link
+        this.elements.continueAsGuestBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             this.enterGuestMode();
         });
 
