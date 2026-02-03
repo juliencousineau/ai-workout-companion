@@ -129,7 +129,9 @@ class App {
 
         // Handle speech recognition results
         voiceService.onResult = (transcript) => {
-            this.addMessage('user', transcript);
+            // Convert word numbers to digits for display
+            const convertedTranscript = workoutEngine.convertWordsToNumbers(transcript.toLowerCase().trim());
+            this.addMessage('user', convertedTranscript);
             workoutEngine.processInput(transcript);
             this.updateProgressDisplay();
         };
