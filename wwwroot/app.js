@@ -46,6 +46,7 @@ class App {
             // Auth elements
             googleSignInBtn: document.getElementById('googleSignInBtn'),
             signedInView: document.getElementById('signedInView'),
+            signedOutView: document.getElementById('signedOutView'),
             guestView: document.getElementById('guestView'),
             continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
             guestSignOutBtn: document.getElementById('guestSignOutBtn'),
