@@ -299,8 +299,8 @@ class VoiceService {
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.voice = this.voice;
-        utterance.rate = options.rate || 1.1;  // Slightly faster for workout context
-        utterance.pitch = options.pitch || 1.0;
+        utterance.rate = options.rate || 1.2;  // Faster, more energetic
+        utterance.pitch = options.pitch || 1.05;  // Slightly higher, more upbeat
         utterance.volume = options.volume || 1.0;
 
         utterance.onstart = () => {
