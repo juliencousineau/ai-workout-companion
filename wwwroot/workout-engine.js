@@ -132,17 +132,27 @@ class WorkoutEngine {
         if (!exercise) return;
 
         const sets = exercise.sets?.length || 3;
+
+        // Common timed exercise names
+        const timedExerciseNames = ['plank', 'wall sit', 'dead hang', 'hollow hold', 'side plank'];
+        const exerciseName = (exercise.title || exercise.exercise_template_id || '').toLowerCase();
+        const isNamedTimedExercise = timedExerciseNames.some(name => exerciseName.includes(name));
+
+        // Check if duration is specified in the first set
+        const firstSetDuration = exercise.sets?.[0]?.duration_seconds || exercise.sets?.[0]?.weight_kg;
+
         const isTimedExercise = exercise.exercise_type === 'duration' ||
             exercise.superset_id?.includes('duration') ||
-            exercise.duration_seconds > 0;
+            exercise.duration_seconds > 0 ||
+            isNamedTimedExercise ||
+            firstSetDuration > 0;
 
         let message = `Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
 
         if (isTimedExercise) {
-            const duration = exercise.duration_seconds || 60;
+            const duration = exercise.duration_seconds || firstSetDuration || 30;
             message += ` (${sets} sets × ${duration} seconds).\n`;
-            message += `This is a timed exercise - I'll count down for you!\n`;
-            message += `Ready for Set 1?`;
+            message += `Ready for Set 1? Say 'yes' to start the timer!`;
             this.isCountdown = true;
             this.timerSeconds = duration;
         } else {
