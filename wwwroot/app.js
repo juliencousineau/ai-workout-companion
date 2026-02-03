@@ -61,7 +61,7 @@ class App {
         this.loadVoiceSettings();
 
         // Check for saved provider credentials
-        const hasCredentials = providerManager.loadSavedProvider();
+        const hasCredentials = await providerManager.loadSavedProvider();
         if (hasCredentials) {
             this.elements.apiKeyInput.value = '••••••••••••••••';
             await this.testConnection();
