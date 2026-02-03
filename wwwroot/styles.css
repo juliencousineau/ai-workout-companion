@@ -154,6 +154,16 @@ button,
     transition: all var(--transition-fast);
 }
 
+/* Hide header on welcome screen for clean Aura aesthetic */
+#welcomeScreen.active~.header,
+.screen#welcomeScreen.active+#setupScreen+* .header {
+    display: none;
+}
+
+body:has(#welcomeScreen.active) .header {
+    display: none;
+}
+
 .header-content {
     display: flex;
     align-items: center;
