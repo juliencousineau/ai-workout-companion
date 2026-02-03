@@ -518,7 +518,13 @@ class WorkoutEngine {
      */
     sendAIMessage(content) {
         if (this.onMessage) {
-            this.onMessage('ai', content);
+            // Remove all emojis from message
+            const cleanContent = content
+                .replace(/[\u{1F000}-\u{1FFFF}]|[\u{2300}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]/gu, '')
+                .replace(/[\uFE0E\uFE0F]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            this.onMessage('ai', cleanContent);
         }
     }
 
