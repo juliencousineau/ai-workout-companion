@@ -53,6 +53,7 @@ class App {
             guestSignOutBtn: document.getElementById('guestSignOutBtn'),
             guestSignOutHeaderBtn: document.getElementById('guestSignOutHeaderBtn'),
             voiceSettingsHeaderLink: document.getElementById('voiceSettingsHeaderLink'),
+            voiceSettingsFooterLink: document.getElementById('voiceSettingsFooterLink'),
             userProfilePic: document.getElementById('userProfilePic'),
             userName: document.getElementById('userName'),
             signOutBtn: document.getElementById('signOutBtn')
@@ -275,6 +276,14 @@ class App {
             this.elements.guestSignOutHeaderBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.exitGuestMode();
+            });
+        }
+
+        // Footer voice settings link
+        if (this.elements.voiceSettingsFooterLink) {
+            this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
             });
         }
 
