@@ -65,7 +65,8 @@ class App {
             userProfilePicFooter: document.getElementById('userProfilePicFooter'),
             userNameFooter: document.getElementById('userNameFooter'),
             guestInfoFooter: document.getElementById('guestInfoFooter'),
-            guestSignOutFooterBtn: document.getElementById('guestSignOutFooterBtn')
+            guestSignOutFooterBtn: document.getElementById('guestSignOutFooterBtn'),
+            userSignOutFooterBtn: document.getElementById('userSignOutFooterBtn')
         };
 
         this.isGuestMode = false;
@@ -205,12 +206,20 @@ class App {
      * Handle user sign out
      */
     handleSignOut() {
+        // Call authService to clear token and user data
+        authService.signOut();
+
+        // Update UI
         this.elements.signedInView.style.display = 'none';
         this.elements.signedOutView.style.display = 'block';
+
         // Update footer
         if (this.elements.userInfoFooter) {
             this.elements.userInfoFooter.style.display = 'none';
         }
+
+        // Return to welcome screen
+        this.showScreen('welcome');
     }
 
     /**
@@ -337,6 +346,14 @@ class App {
             this.elements.guestSignOutFooterBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.exitGuestMode();
+            });
+        }
+
+        // User sign out footer button
+        if (this.elements.userSignOutFooterBtn) {
+            this.elements.userSignOutFooterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleSignOut();
             });
         }
 
