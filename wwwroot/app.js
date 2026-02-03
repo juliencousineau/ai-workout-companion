@@ -5,6 +5,7 @@
 class App {
     constructor() {
         this.screens = {
+            welcome: document.getElementById('welcomeScreen'),
             setup: document.getElementById('setupScreen'),
             voiceSettings: document.getElementById('voiceSettingsScreen'),
             workoutSelect: document.getElementById('workoutSelectScreen'),
@@ -41,8 +42,34 @@ class App {
             rateValue: document.getElementById('rateValue'),
             volumeSlider: document.getElementById('volumeSlider'),
             volumeValue: document.getElementById('volumeValue'),
-            testVoiceBtn: document.getElementById('testVoiceBtn')
+            testVoiceBtn: document.getElementById('testVoiceBtn'),
+            // Auth elements
+            googleSignInBtn: document.getElementById('googleSignInBtn'),
+            signedInView: document.getElementById('signedInView'),
+            signedOutView: document.getElementById('signedOutView'),
+            guestView: document.getElementById('guestView'),
+            guestViewHeader: document.getElementById('guestViewHeader'),
+            continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
+            guestSignOutBtn: document.getElementById('guestSignOutBtn'),
+            guestSignOutHeaderBtn: document.getElementById('guestSignOutHeaderBtn'),
+            voiceSettingsHeaderLink: document.getElementById('voiceSettingsHeaderLink'),
+            voiceSettingsFooterLink: document.getElementById('voiceSettingsFooterLink'),
+            userProfilePic: document.getElementById('userProfilePic'),
+            userName: document.getElementById('userName'),
+            signOutBtn: document.getElementById('signOutBtn'),
+
+            // Footer menu elements
+            connectionStatusFooter: document.getElementById('connectionStatusFooter'),
+            connectionStatusFooterText: document.getElementById('connectionStatusFooterText'),
+            userInfoFooter: document.getElementById('userInfoFooter'),
+            userProfilePicFooter: document.getElementById('userProfilePicFooter'),
+            userNameFooter: document.getElementById('userNameFooter'),
+            guestInfoFooter: document.getElementById('guestInfoFooter'),
+            guestSignOutFooterBtn: document.getElementById('guestSignOutFooterBtn'),
+            userSignOutFooterBtn: document.getElementById('userSignOutFooterBtn')
         };
+
+        this.isGuestMode = false;
 
         this.selectedRoutine = null;
         this.routines = [];
@@ -57,14 +84,164 @@ class App {
         this.bindEvents();
         this.setupWorkoutEngine();
         this.setupVoiceService();
-        this.populateVoiceSelector();
+
+        // Initialize Google Auth
+        await this.initAuth();
+
+        // Load user settings (voice preferences)
+        await userSettingsService.loadSettings();
         this.loadVoiceSettings();
+        this.populateVoiceSelector();
 
         // Check for saved provider credentials
         const hasCredentials = await providerManager.loadSavedProvider();
         if (hasCredentials) {
             this.elements.apiKeyInput.value = '••••••••••••••••';
             await this.testConnection();
+        }
+    }
+
+    /**
+     * Initialize authentication
+     */
+    async initAuth() {
+        // Set up auth event listeners
+        window.addEventListener('auth:signed-in', (e) => this.handleSignIn(e.detail));
+        window.addEventListener('auth:signed-out', () => this.handleSignOut());
+
+        // Check if already authenticated
+        if (authService.isAuthenticated()) {
+            this.showUserProfile(authService.getUser());
+            this.showScreen('setup'); // Skip welcome, go to setup
+            return;
+        }
+
+        // Check if guest mode was previously selected
+        if (localStorage.getItem('guest_mode') === 'true') {
+            this.enterGuestMode();
+            return;
+        }
+
+        // Show welcome screen for auth selection
+        this.showScreen('welcome');
+
+        // Fetch Google Client ID from backend configuration
+        let clientId = '';
+        try {
+            const response = await fetch('/api/config');
+            if (response.ok) {
+                const config = await response.json();
+                clientId = config.googleClientId || '';
+            }
+        } catch (error) {
+            console.warn('Failed to fetch config:', error);
+        }
+
+        // Only initialize Google if Client ID is configured
+        if (clientId) {
+            try {
+                await authService.initGoogle(clientId);
+                authService.renderGoogleButton('googleSignInBtn', {
+                    theme: 'filled_blue',
+                    size: 'large',
+                    text: 'signin_with',
+                    width: 280
+                });
+            } catch (error) {
+                console.warn('Google Auth not available:', error);
+            }
+        } else {
+            // Hide Google button if not configured
+            this.elements.googleSignInBtn.style.display = 'none';
+        }
+    }
+
+    /**
+     * Enter guest mode (localStorage only, no server sync)
+     */
+    enterGuestMode() {
+        this.isGuestMode = true;
+        localStorage.setItem('isGuestMode', 'true');
+        this.elements.guestView.style.display = 'flex';
+        this.elements.guestViewHeader.style.display = 'flex';
+        // Update footer
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'flex';
+        }
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'none';
+        }
+        this.showScreen('setup');
+    }
+
+    /**
+     * Exit guest mode and return to welcome screen
+     */
+    exitGuestMode() {
+        this.isGuestMode = false;
+        localStorage.removeItem('isGuestMode');
+        this.elements.guestView.style.display = 'none';
+        this.elements.guestViewHeader.style.display = 'none';
+        // Update footer
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'none';
+        }
+        this.showScreen('welcome');
+    }
+
+    /**
+     * Handle user sign in
+     */
+    handleSignIn(user) {
+        this.showUserProfile(user);
+        // Reload settings from server
+        userSettingsService.loadSettings().then(() => {
+            this.loadVoiceSettings();
+        });
+        // Navigate to setup screen
+        this.showScreen('setup');
+    }
+
+    /**
+     * Handle user sign out
+     */
+    handleSignOut() {
+        // Call authService to clear token and user data
+        authService.signOut();
+
+        // Update UI
+        this.elements.signedInView.style.display = 'none';
+        this.elements.signedOutView.style.display = 'block';
+
+        // Update footer
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'none';
+        }
+
+        // Return to welcome screen
+        this.showScreen('welcome');
+    }
+
+    /**
+     * Show user profile in header
+     */
+    showUserProfile(user) {
+        this.elements.signedOutView.style.display = 'none';
+        this.elements.signedInView.style.display = 'flex';
+        this.elements.userName.textContent = user.name;
+        if (user.profilePictureUrl) {
+            this.elements.userProfilePic.src = user.profilePictureUrl;
+        }
+        // Update footer
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'flex';
+            this.elements.userNameFooter.textContent = user.name;
+            if (user.profilePictureUrl) {
+                this.elements.userProfilePicFooter.src = user.profilePictureUrl;
+            }
+        }
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'none';
         }
     }
 
@@ -109,11 +286,76 @@ class App {
         // Back to providers button
         this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
 
+        // Sign out button
+        this.elements.signOutBtn.addEventListener('click', () => {
+            authService.signOut();
+        });
+
+        // Continue as guest link
+        this.elements.continueAsGuestBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.enterGuestMode();
+        });
+
+        // Guest sign out button
+        this.elements.guestSignOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.exitGuestMode();
+        });
+
         // Voice settings link
         this.elements.voiceSettingsLink.addEventListener('click', (e) => {
             e.preventDefault();
             this.showScreen('voiceSettings');
         });
+
+        // Header voice settings link
+        if (this.elements.voiceSettingsHeaderLink) {
+            this.elements.voiceSettingsHeaderLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
+            });
+        }
+
+        // Header guest sign out button
+        if (this.elements.guestSignOutHeaderBtn) {
+            this.elements.guestSignOutHeaderBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exitGuestMode();
+            });
+        }
+
+        // Footer voice settings link
+        if (this.elements.voiceSettingsFooterLink) {
+            this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
+            });
+        }
+
+        // Footer voice settings link
+        if (this.elements.voiceSettingsFooterLink) {
+            this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
+            });
+        }
+
+        // Footer guest sign out button
+        if (this.elements.guestSignOutFooterBtn) {
+            this.elements.guestSignOutFooterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exitGuestMode();
+            });
+        }
+
+        // User sign out footer button
+        if (this.elements.userSignOutFooterBtn) {
+            this.elements.userSignOutFooterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleSignOut();
+            });
+        }
 
         // Back from voice settings
         this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => this.showScreen('setup'));
@@ -126,7 +368,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.pitchValue.textContent = value.toFixed(2);
             voiceService.pitch = value;
-            localStorage.setItem('tts_pitch', value);
+            userSettingsService.set('tts_pitch', value);
         });
 
         // Rate slider
@@ -134,7 +376,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.rateValue.textContent = value.toFixed(1);
             voiceService.rate = value;
-            localStorage.setItem('tts_rate', value);
+            userSettingsService.set('tts_rate', value);
         });
 
         // Volume slider
@@ -142,7 +384,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.volumeValue.textContent = value.toFixed(1);
             voiceService.volume = value;
-            localStorage.setItem('tts_volume', value);
+            userSettingsService.set('tts_volume', value);
         });
 
         // Test voice button
@@ -269,19 +511,19 @@ class App {
      */
     loadVoiceSettings() {
         // Load pitch
-        const savedPitch = parseFloat(localStorage.getItem('tts_pitch') || '1.05');
+        const savedPitch = parseFloat(userSettingsService.get('tts_pitch', '1.05'));
         this.elements.pitchSlider.value = savedPitch;
         this.elements.pitchValue.textContent = savedPitch.toFixed(2);
         voiceService.pitch = savedPitch;
 
         // Load rate
-        const savedRate = parseFloat(localStorage.getItem('tts_rate') || '1.2');
+        const savedRate = parseFloat(userSettingsService.get('tts_rate', '1.2'));
         this.elements.rateSlider.value = savedRate;
         this.elements.rateValue.textContent = savedRate.toFixed(1);
         voiceService.rate = savedRate;
 
         // Load volume
-        const savedVolume = parseFloat(localStorage.getItem('tts_volume') || '1.0');
+        const savedVolume = parseFloat(userSettingsService.get('tts_volume', '1.0'));
         this.elements.volumeSlider.value = savedVolume;
         this.elements.volumeValue.textContent = savedVolume.toFixed(1);
         voiceService.volume = savedVolume;
@@ -372,11 +614,21 @@ class App {
             dot.classList.add('connected');
             text.textContent = 'Connected';
             this.elements.disconnectBtn.style.display = 'inline-block';
+            // Update footer
+            if (this.elements.connectionStatusFooter) {
+                this.elements.connectionStatusFooter.style.display = 'flex';
+                this.elements.connectionStatusFooter.classList.remove('disconnected');
+                this.elements.connectionStatusFooterText.textContent = 'Connected';
+            }
         } else {
             dot.classList.remove('connected');
             dot.classList.add('disconnected');
             text.textContent = 'Not Connected';
             this.elements.disconnectBtn.style.display = 'none';
+            // Update footer
+            if (this.elements.connectionStatusFooter) {
+                this.elements.connectionStatusFooter.style.display = 'none';
+            }
         }
     }
 
@@ -634,12 +886,25 @@ class App {
      * Show a specific screen
      */
     showScreen(screenName) {
-        Object.values(this.screens).forEach(screen => {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
 
-        if (this.screens[screenName]) {
-            this.screens[screenName].classList.add('active');
+        // Show selected screen
+        const targetScreen = document.getElementById(`${screenName}Screen`);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+        }
+
+        // Hide footer on welcome screen, show on all others
+        const footer = document.querySelector('.footer');
+        if (footer) {
+            if (screenName === 'welcome') {
+                footer.style.display = 'none';
+            } else {
+                footer.style.display = 'block';
+            }
         }
     }
 }

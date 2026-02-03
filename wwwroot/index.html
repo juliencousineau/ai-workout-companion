@@ -9,6 +9,7 @@
         content="AI-powered workout companion that guides you through exercises with real-time logging to Hevy">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -17,19 +18,66 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="logo">🏋️ AI Workout Companion</h1>
-                <div class="connection-status" id="connectionStatus">
-                    <span class="status-dot disconnected"></span>
-                    <span>Not Connected</span>
-                    <button id="disconnectBtn" class="btn-disconnect" title="Disconnect"
-                        style="display: none;">✕</button>
+                <div class="header-right">
+                    <!--Voice Settings Link -->
+                    <a href="#" id="voiceSettingsHeaderLink" class="voice-settings-link">⚙️ Voice Settings</a>
+
+                    <!-- User Auth Status -->
+                    <div id="userAuthSection" class="user-auth">
+                        <div id="signedInView" class="user-profile" style="display: none;">
+                            <img id="userProfilePic" class="user-avatar" alt="User">
+                            <span id="userName"></span>
+                            <button id="signOutBtn" class="btn-sign-out">Sign Out</button>
+                        </div>
+                        <div id="signedOutView" style="display: none;"></div>
+                    </div>
+
+                    <!-- Guest View-->
+                    <div id="guestViewHeader" class="guest-view" style="display: none;">
+                        <span class="guest-label">Guest</span>
+                        <button id="guestSignOutHeaderBtn" class="btn-sign-out">Sign out</button>
+                    </div>
+
+                    <!-- Connection Status -->
+                    <div class="connection-status" id="connectionStatus">
+                        <span class="status-dot disconnected"></span>
+                        <span>Not Connected</span>
+                        <button id="disconnectBtn" class="btn-disconnect" title="Disconnect"
+                            style="display: none;">✕</button>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Welcome Screen (Sign Up / Guest) -->
+            <div id="welcomeScreen" class="screen active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            AI Workout<br>Companion<span class="title-accent">,<br>intelligent.</span>
+                        </h1>
+
+                        <p class="hero-description">
+                            A thoughtful approach to strength training. No distractions, no clutter—just intelligent
+                            guidance your body responds to.
+                        </p>
+
+                        <div class="hero-actions">
+                            <div id="googleSignInBtn" class="google-signin-container"></div>
+                            <a href="#" id="continueAsGuestBtn" class="guest-link">Continue as Guest</a>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <!-- Visual placeholder with subtle gradient -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Setup Screen -->
-            <div id="setupScreen" class="screen active">
+            <div id="setupScreen" class="screen">
                 <!-- Provider Selection View -->
                 <div id="providerSelectView" class="setup-view">
                     <h2 class="setup-title">Choose a Workout App</h2>
@@ -50,8 +98,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Voice Settings Link -->
-                    <div class="voice-settings-link-section">
+                    <!-- Guest Mode & Voice Settings Section -->
+                    <div class="settings-links-section">
+                        <div id="guestView" class="guest-view" style="display: none;">
+                            <span class="guest-label">Guest</span>
+                            <a href="#" id="guestSignOutBtn" class="link-secondary">Sign out</a>
+                        </div>
                         <a href="#" id="voiceSettingsLink" class="voice-settings-link">⚙️ Voice Settings</a>
                     </div>
                 </div>
@@ -185,9 +237,49 @@
                 </div>
             </div>
         </main>
+
+        <!-- Footer Menu (Static - Not Sticky) -->
+        <footer class="footer">
+            <div class="footer-content">
+                <!-- Left Side: Guest/User Info -->
+                <div class="footer-left">
+                    <!-- Guest Info -->
+                    <div id="guestInfoFooter" class="footer-guest-info" style="display: none;">
+                        <span class="footer-guest-label">Guest</span>
+                        <a href="#" id="guestSignOutFooterBtn" class="footer-link-secondary">Sign out</a>
+                    </div>
+
+                    <!-- User Info (Signed In) -->
+                    <div id="userInfoFooter" class="footer-user-info" style="display: none;">
+                        <img id="userProfilePicFooter" class="footer-user-avatar" src="" alt="User">
+                        <div class="footer-user-details">
+                            <span id="userNameFooter" class="footer-user-name"></span>
+                            <a href="#" id="userSignOutFooterBtn" class="footer-link-secondary">Sign out</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Voice Settings + Connection -->
+                <div class="footer-right">
+                    <!-- Connection Status -->
+                    <div id="connectionStatusFooter" class="footer-status" style="display: none;">
+                        <span class="footer-status-dot"></span>
+                        <span class="footer-status-text" id="connectionStatusFooterText">Connected</span>
+                    </div>
+
+                    <!-- Voice Settings Link -->
+                    <a href="#" id="voiceSettingsFooterLink" class="footer-link">
+                        <span class="footer-link-icon">⚙️</span>
+                        <span class="footer-link-text">Voice Settings</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="crypto-utils.js"></script>
+    <script src="auth-service.js"></script>
+    <script src="user-settings-service.js"></script>
     <script src="providers/provider-interface.js"></script>
     <script src="providers/provider-manager.js"></script>
     <script src="providers/hevy-provider.js"></script>

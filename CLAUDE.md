@@ -25,9 +25,8 @@
 - This provides context for the new feature
 
 ### 3. PLANNING
-- **BEFORE ANY IMPLEMENTATION**, create a planning file in `/planning/`
-- Use incremental naming: `01-xxxx.md`, `02-xxxx.md`, `03-xxxx.md`, etc.
-- The planning file must describe WHAT will be built and HOW
+- **BEFORE ANY IMPLEMENTATION**, create a planning artifact (implementation_plan.md)
+- The planning must describe WHAT will be built and HOW
 - Reference relevant past iterations and how the new feature fits
 
 ### 4. USER REVIEW
@@ -36,12 +35,14 @@
 
 ### 5. IMPLEMENTATION
 - Only after approval, proceed with the implementation
-- Reference the planning file in commits
+- Reference the planning in commits
+- Create a walkthrough artifact (walkthrough.md) documenting what was built
 
-### 6. WALKTHROUGH
-- **AFTER IMPLEMENTATION**, create a walkthrough file in `/walkthrough/`
-- Use matching name: `01-xxxx-walkthrough.md` (matches planning file)
-- Document what was built, files created, and how to use it
+### 6. SAVE ARTIFACTS
+- **AFTER IMPLEMENTATION IS COMPLETE**, run `/save-artifacts`
+- This copies implementation_plan.md → `/planning/0x-feature-name.md`
+- And walkthrough.md → `/walkthrough/0x-feature-name-walkthrough.md`
+- Use incremental naming: `01-xxxx.md`, `02-xxxx.md`, `03-xxxx.md`, etc.
 
 ---
 
