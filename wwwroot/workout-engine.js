@@ -411,13 +411,9 @@ class WorkoutEngine {
         this.timerInterval = setInterval(() => {
             remaining--;
 
-            // Milestone announcements
-            if (remaining === Math.floor(duration / 2)) {
-                this.sendAIMessage(this.getMotivation('timerHalfway'));
-            } else if (remaining === 30 && duration > 45) {
-                this.sendAIMessage(this.getMotivation('timer30sec'));
-            } else if (remaining === 15) {
-                this.sendAIMessage(this.getMotivation('timer15sec'));
+            // Announce every 10 seconds
+            if (remaining > 0 && remaining % 10 === 0) {
+                this.sendAIMessage(`${remaining} seconds...`);
             } else if (remaining === 0) {
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
