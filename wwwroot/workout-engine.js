@@ -445,7 +445,7 @@ class WorkoutEngine {
             this.moveToNextExercise();
         } else {
             // Start rest timer between sets
-            const restSeconds = exercise?.sets?.[this.currentSetIndex]?.rest_seconds || 60;
+            const restSeconds = exercise?.rest_seconds || exercise?.sets?.[this.currentSetIndex]?.rest_seconds || 60;
             this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
             this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         }
