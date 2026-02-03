@@ -45,10 +45,18 @@ class VoiceService {
 
             // Handle interim results for fast interruption
             if (!result.isFinal) {
-                // If AI is speaking and user says anything, stop AI immediately
-                if (this.isSpeaking && transcript.length > 2) {
-                    console.log('Interim result detected, stopping AI:', transcript);
+                // Only process meaningful input
+                if (transcript.length < 2) {
+                    return;
+                }
+
+                // Filter interim result - only stop AI if it's real user input, not self-hearing
+                const cleanedInterim = this.filterSelfHearing(transcript);
+                if (cleanedInterim && this.isSpeaking) {
+                    console.log('Interim result detected (user input), stopping AI:', cleanedInterim);
                     this.stopSpeaking();
+                } else if (!cleanedInterim) {
+                    console.log('Interim result filtered (self-hearing):', transcript);
                 }
                 return;
             }
