@@ -41,7 +41,14 @@ class App {
             rateValue: document.getElementById('rateValue'),
             volumeSlider: document.getElementById('volumeSlider'),
             volumeValue: document.getElementById('volumeValue'),
-            testVoiceBtn: document.getElementById('testVoiceBtn')
+            testVoiceBtn: document.getElementById('testVoiceBtn'),
+            // Auth elements
+            googleSignInBtn: document.getElementById('googleSignInBtn'),
+            signedOutView: document.getElementById('signedOutView'),
+            signedInView: document.getElementById('signedInView'),
+            userProfilePic: document.getElementById('userProfilePic'),
+            userName: document.getElementById('userName'),
+            signOutBtn: document.getElementById('signOutBtn')
         };
 
         this.selectedRoutine = null;
@@ -57,14 +64,83 @@ class App {
         this.bindEvents();
         this.setupWorkoutEngine();
         this.setupVoiceService();
-        this.populateVoiceSelector();
+
+        // Initialize Google Auth
+        await this.initAuth();
+
+        // Load user settings (voice preferences)
+        await userSettingsService.loadSettings();
         this.loadVoiceSettings();
+        this.populateVoiceSelector();
 
         // Check for saved provider credentials
         const hasCredentials = await providerManager.loadSavedProvider();
         if (hasCredentials) {
             this.elements.apiKeyInput.value = '••••••••••••••••';
             await this.testConnection();
+        }
+    }
+
+    /**
+     * Initialize authentication
+     */
+    async initAuth() {
+        // Set up auth event listeners
+        window.addEventListener('auth:signed-in', (e) => this.handleSignIn(e.detail));
+        window.addEventListener('auth:signed-out', () => this.handleSignOut());
+
+        // Initialize Google Sign-In
+        const clientId = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'; // TODO: Move to config
+        try {
+            await authService.initGoogle(clientId);
+
+            // Render Google button if not authenticated
+            if (!authService.isAuthenticated()) {
+                this.elements.signedOutView.style.display = 'block';
+                authService.renderGoogleButton('googleSignInBtn', {
+                    theme: 'outline',
+                    size: 'medium',
+                    text: 'signin'
+                });
+            } else {
+                // Show user profile
+                this.showUserProfile(authService.getUser());
+            }
+        } catch (error) {
+            console.error('Failed to initialize Google Auth:', error);
+            // Show sign-in button anyway for manual retry
+            this.elements.signedOutView.style.display = 'block';
+        }
+    }
+
+    /**
+     * Handle user sign in
+     */
+    handleSignIn(user) {
+        this.showUserProfile(user);
+        // Reload settings from server
+        userSettingsService.loadSettings().then(() => {
+            this.loadVoiceSettings();
+        });
+    }
+
+    /**
+     * Handle user sign out
+     */
+    handleSignOut() {
+        this.elements.signedInView.style.display = 'none';
+        this.elements.signedOutView.style.display = 'block';
+    }
+
+    /**
+     * Show user profile in header
+     */
+    showUserProfile(user) {
+        this.elements.signedOutView.style.display = 'none';
+        this.elements.signedInView.style.display = 'flex';
+        this.elements.userName.textContent = user.name;
+        if (user.profilePictureUrl) {
+            this.elements.userProfilePic.src = user.profilePictureUrl;
         }
     }
 
@@ -109,6 +185,11 @@ class App {
         // Back to providers button
         this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
 
+        // Sign out button
+        this.elements.signOutBtn.addEventListener('click', () => {
+            authService.signOut();
+        });
+
         // Voice settings link
         this.elements.voiceSettingsLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -126,7 +207,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.pitchValue.textContent = value.toFixed(2);
             voiceService.pitch = value;
-            localStorage.setItem('tts_pitch', value);
+            userSettingsService.set('tts_pitch', value);
         });
 
         // Rate slider
@@ -134,7 +215,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.rateValue.textContent = value.toFixed(1);
             voiceService.rate = value;
-            localStorage.setItem('tts_rate', value);
+            userSettingsService.set('tts_rate', value);
         });
 
         // Volume slider
@@ -142,7 +223,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.volumeValue.textContent = value.toFixed(1);
             voiceService.volume = value;
-            localStorage.setItem('tts_volume', value);
+            userSettingsService.set('tts_volume', value);
         });
 
         // Test voice button
@@ -269,19 +350,19 @@ class App {
      */
     loadVoiceSettings() {
         // Load pitch
-        const savedPitch = parseFloat(localStorage.getItem('tts_pitch') || '1.05');
+        const savedPitch = parseFloat(userSettingsService.get('tts_pitch', '1.05'));
         this.elements.pitchSlider.value = savedPitch;
         this.elements.pitchValue.textContent = savedPitch.toFixed(2);
         voiceService.pitch = savedPitch;
 
         // Load rate
-        const savedRate = parseFloat(localStorage.getItem('tts_rate') || '1.2');
+        const savedRate = parseFloat(userSettingsService.get('tts_rate', '1.2'));
         this.elements.rateSlider.value = savedRate;
         this.elements.rateValue.textContent = savedRate.toFixed(1);
         voiceService.rate = savedRate;
 
         // Load volume
-        const savedVolume = parseFloat(localStorage.getItem('tts_volume') || '1.0');
+        const savedVolume = parseFloat(userSettingsService.get('tts_volume', '1.0'));
         this.elements.volumeSlider.value = savedVolume;
         this.elements.volumeValue.textContent = savedVolume.toFixed(1);
         voiceService.volume = savedVolume;

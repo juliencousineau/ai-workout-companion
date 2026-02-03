@@ -9,6 +9,7 @@
         content="AI-powered workout companion that guides you through exercises with real-time logging to Hevy">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -17,11 +18,25 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="logo">🏋️ AI Workout Companion</h1>
-                <div class="connection-status" id="connectionStatus">
-                    <span class="status-dot disconnected"></span>
-                    <span>Not Connected</span>
-                    <button id="disconnectBtn" class="btn-disconnect" title="Disconnect"
-                        style="display: none;">✕</button>
+                <div class="header-right">
+                    <!-- User Auth -->
+                    <div id="userAuthSection" class="user-auth">
+                        <div id="signedOutView" style="display: none;">
+                            <div id="googleSignInBtn"></div>
+                        </div>
+                        <div id="signedInView" class="user-profile" style="display: none;">
+                            <img id="userProfilePic" class="user-avatar" alt="User">
+                            <span id="userName"></span>
+                            <button id="signOutBtn" class="btn-sign-out">Sign Out</button>
+                        </div>
+                    </div>
+                    <!-- Connection Status -->
+                    <div class="connection-status" id="connectionStatus">
+                        <span class="status-dot disconnected"></span>
+                        <span>Not Connected</span>
+                        <button id="disconnectBtn" class="btn-disconnect" title="Disconnect"
+                            style="display: none;">✕</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -188,6 +203,8 @@
     </div>
 
     <script src="crypto-utils.js"></script>
+    <script src="auth-service.js"></script>
+    <script src="user-settings-service.js"></script>
     <script src="providers/provider-interface.js"></script>
     <script src="providers/provider-manager.js"></script>
     <script src="providers/hevy-provider.js"></script>
