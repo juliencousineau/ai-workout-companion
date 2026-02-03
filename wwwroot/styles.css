@@ -35,6 +35,7 @@
     --shadow-sm: 0 1px 2px rgba(141, 163, 153, 0.05);
     --shadow-md: 0 4px 6px rgba(141, 163, 153, 0.1);
     --shadow-lg: 0 10px 24px rgba(141, 163, 153, 0.15);
+    --shadow-glow: 0 10px 30px rgba(141, 163, 153, 0.2);
 
     /* Border Radius */
     --radius-sm: 6px;
@@ -44,6 +45,26 @@
     /* Transitions - Gentle & Smooth */
     --transition-fast: 300ms ease-in-out;
     --transition-slow: 600ms ease-in-out;
+
+    /* Background Colors */
+    --bg-primary: var(--stone-50);
+    --bg-secondary: var(--stone-100);
+    --bg-card: #FFFFFF;
+    --bg-elevated: var(--stone-50);
+
+    /* Text Colors */
+    --text-primary: var(--stone-900);
+    --text-secondary: var(--stone-800);
+    --text-muted: rgba(28, 25, 23, 0.5);
+
+    /* Accent Colors */
+    --accent-primary: var(--sage-500);
+    --accent-primary-hover: var(--sage-400);
+    --accent-success: #10b981;
+    --accent-danger: #ef4444;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--stone-900) 0%, var(--stone-800) 100%);
 }
 
 * {
@@ -765,8 +786,8 @@ button,
 }
 
 .btn-primary {
-    background: var(--gradient-primary);
-    color: white;
+    background: var(--stone-900);
+    color: var(--stone-50);
     box-shadow: var(--shadow-sm);
 }
 
