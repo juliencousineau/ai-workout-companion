@@ -46,10 +46,14 @@ class App {
             googleSignInBtn: document.getElementById('googleSignInBtn'),
             signedOutView: document.getElementById('signedOutView'),
             signedInView: document.getElementById('signedInView'),
+            guestView: document.getElementById('guestView'),
+            continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
             userProfilePic: document.getElementById('userProfilePic'),
             userName: document.getElementById('userName'),
             signOutBtn: document.getElementById('signOutBtn')
         };
+
+        this.isGuestMode = false;
 
         this.selectedRoutine = null;
         this.routines = [];
@@ -89,28 +93,50 @@ class App {
         window.addEventListener('auth:signed-in', (e) => this.handleSignIn(e.detail));
         window.addEventListener('auth:signed-out', () => this.handleSignOut());
 
-        // Initialize Google Sign-In
-        const clientId = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'; // TODO: Move to config
-        try {
-            await authService.initGoogle(clientId);
+        // Initialize Google Sign-In (optional - may not be configured)
+        const clientId = ''; // Empty = no Google OAuth configured
 
-            // Render Google button if not authenticated
-            if (!authService.isAuthenticated()) {
-                this.elements.signedOutView.style.display = 'block';
+        // Check if already authenticated
+        if (authService.isAuthenticated()) {
+            this.showUserProfile(authService.getUser());
+            return;
+        }
+
+        // Check if guest mode was previously selected
+        if (localStorage.getItem('guest_mode') === 'true') {
+            this.enterGuestMode();
+            return;
+        }
+
+        // Show sign-in options
+        this.elements.signedOutView.style.display = 'flex';
+
+        // Only initialize Google if Client ID is configured
+        if (clientId) {
+            try {
+                await authService.initGoogle(clientId);
                 authService.renderGoogleButton('googleSignInBtn', {
                     theme: 'outline',
                     size: 'medium',
                     text: 'signin'
                 });
-            } else {
-                // Show user profile
-                this.showUserProfile(authService.getUser());
+            } catch (error) {
+                console.warn('Google Auth not available:', error);
             }
-        } catch (error) {
-            console.error('Failed to initialize Google Auth:', error);
-            // Show sign-in button anyway for manual retry
-            this.elements.signedOutView.style.display = 'block';
+        } else {
+            // Hide Google button if not configured
+            this.elements.googleSignInBtn.style.display = 'none';
         }
+    }
+
+    /**
+     * Enter guest mode (localStorage only, no server sync)
+     */
+    enterGuestMode() {
+        this.isGuestMode = true;
+        localStorage.setItem('guest_mode', 'true');
+        this.elements.signedOutView.style.display = 'none';
+        this.elements.guestView.style.display = 'block';
     }
 
     /**
@@ -188,6 +214,11 @@ class App {
         // Sign out button
         this.elements.signOutBtn.addEventListener('click', () => {
             authService.signOut();
+        });
+
+        // Continue as guest button
+        this.elements.continueAsGuestBtn.addEventListener('click', () => {
+            this.enterGuestMode();
         });
 
         // Voice settings link
