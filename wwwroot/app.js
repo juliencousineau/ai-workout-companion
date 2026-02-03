@@ -869,12 +869,25 @@ class App {
      * Show a specific screen
      */
     showScreen(screenName) {
-        Object.values(this.screens).forEach(screen => {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
 
-        if (this.screens[screenName]) {
-            this.screens[screenName].classList.add('active');
+        // Show selected screen
+        const targetScreen = document.getElementById(`${screenName}Screen`);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+        }
+
+        // Hide footer on welcome screen, show on all others
+        const footer = document.querySelector('.footer');
+        if (footer) {
+            if (screenName === 'welcome') {
+                footer.style.display = 'none';
+            } else {
+                footer.style.display = 'block';
+            }
         }
     }
 }

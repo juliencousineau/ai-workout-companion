@@ -181,9 +181,17 @@ button,
 
 .footer-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     gap: var(--space-md);
-    align-items: flex-start;
+}
+
+.footer-left,
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
 }
 
 /* Footer Links */
@@ -573,15 +581,6 @@ button,
     position: relative;
 }
 
-.hero-visual::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 40%,
-            rgba(168, 189, 181, 0.15) 0%,
-            transparent 70%);
-    border-radius: var(--radius-md);
-}
 
 /* Responsive */
 @media (max-width: 768px) {

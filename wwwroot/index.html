@@ -241,28 +241,34 @@
         <!-- Footer Menu (Static - Not Sticky) -->
         <footer class="footer">
             <div class="footer-content">
-                <!-- Voice Settings Link -->
-                <a href="#" id="voiceSettingsFooterLink" class="footer-link">
-                    <span class="footer-link-icon">⚙️</span>
-                    <span class="footer-link-text">Voice Settings</span>
-                </a>
+                <!-- Left Side: Guest/User Info -->
+                <div class="footer-left">
+                    <!-- Guest Info -->
+                    <div id="guestInfoFooter" class="footer-guest-info" style="display: none;">
+                        <span class="footer-guest-label">Guest</span>
+                        <a href="#" id="guestSignOutFooterBtn" class="footer-link-secondary">Sign out</a>
+                    </div>
 
-                <!-- Connection Status -->
-                <div id="connectionStatusFooter" class="footer-status" style="display: none;">
-                    <span class="footer-status-dot"></span>
-                    <span class="footer-status-text" id="connectionStatusFooterText">Connected</span>
+                    <!-- User Info (Signed In) -->
+                    <div id="userInfoFooter" class="footer-user-info" style="display: none;">
+                        <img id="userProfilePicFooter" class="footer-user-avatar" src="" alt="User">
+                        <span id="userNameFooter" class="footer-user-name"></span>
+                    </div>
                 </div>
 
-                <!-- User Info (Signed In) -->
-                <div id="userInfoFooter" class="footer-user-info" style="display: none;">
-                    <img id="userProfilePicFooter" class="footer-user-avatar" src="" alt="User">
-                    <span id="userNameFooter" class="footer-user-name"></span>
-                </div>
+                <!-- Right Side: Voice Settings + Connection -->
+                <div class="footer-right">
+                    <!-- Connection Status -->
+                    <div id="connectionStatusFooter" class="footer-status" style="display: none;">
+                        <span class="footer-status-dot"></span>
+                        <span class="footer-status-text" id="connectionStatusFooterText">Connected</span>
+                    </div>
 
-                <!-- Guest Info -->
-                <div id="guestInfoFooter" class="footer-guest-info" style="display: none;">
-                    <span class="footer-guest-label">Guest</span>
-                    <a href="#" id="guestSignOutFooterBtn" class="footer-link-secondary">Sign out</a>
+                    <!-- Voice Settings Link -->
+                    <a href="#" id="voiceSettingsFooterLink" class="footer-link">
+                        <span class="footer-link-icon">⚙️</span>
+                        <span class="footer-link-text">Voice Settings</span>
+                    </a>
                 </div>
             </div>
         </footer>
