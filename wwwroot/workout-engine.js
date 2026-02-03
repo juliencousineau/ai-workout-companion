@@ -131,9 +131,6 @@ class WorkoutEngine {
     announceExercise(exercise) {
         if (!exercise) return;
 
-        // Debug: Log the exercise structure to understand API fields
-        console.log('Exercise data from API:', JSON.stringify(exercise, null, 2));
-
         const sets = exercise.sets?.length || 3;
 
         // Check if duration is specified in the first set (from API)
