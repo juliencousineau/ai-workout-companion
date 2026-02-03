@@ -339,7 +339,7 @@ class VoiceService {
         // Clean up old sentences first
         const now = Date.now();
         const beforeCount = this.recentSentences.length;
-        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 5000);
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 1000);
         const afterCount = this.recentSentences.length;
 
         if (beforeCount > afterCount) {
