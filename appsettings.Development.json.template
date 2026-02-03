@@ -4,12 +4,12 @@
     },
     "Authentication": {
         "Google": {
-            "ClientId": "",
-            "ClientSecret": ""
+            "ClientId": "YOUR_LOCAL_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+            "ClientSecret": "YOUR_LOCAL_GOOGLE_CLIENT_SECRET"
         }
     },
     "Jwt": {
-        "SecretKey": "",
+        "SecretKey": "GENERATE_WITH: openssl rand -base64 48",
         "Issuer": "ai-workout-companion",
         "Audience": "ai-workout-companion-client"
     },

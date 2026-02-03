@@ -9,5 +9,10 @@ obj/
 *.suo
 *.userprefs
 
+# Configuration with credentials
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
 # macOS
 .DS_Store
