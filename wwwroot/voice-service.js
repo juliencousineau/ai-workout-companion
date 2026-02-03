@@ -71,6 +71,7 @@ class VoiceService {
 
             // Filter out self-hearing words, keep user input
             const cleanedTranscript = this.filterSelfHearing(transcript);
+            console.log('FINAL RESULT - Original:', transcript, '→ Cleaned:', cleanedTranscript);
             if (!cleanedTranscript) {
                 console.log('Filtered out self-hearing:', transcript);
                 return;
@@ -82,6 +83,7 @@ class VoiceService {
             }
 
             if (this.onResult) {
+                console.log('Sending to onResult:', cleanedTranscript);
                 this.onResult(cleanedTranscript);
             }
         };
