@@ -48,8 +48,11 @@ class App {
             signedInView: document.getElementById('signedInView'),
             signedOutView: document.getElementById('signedOutView'),
             guestView: document.getElementById('guestView'),
+            guestViewHeader: document.getElementById('guestViewHeader'),
             continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
             guestSignOutBtn: document.getElementById('guestSignOutBtn'),
+            guestSignOutHeaderBtn: document.getElementById('guestSignOutHeaderBtn'),
+            voiceSettingsHeaderLink: document.getElementById('voiceSettingsHeaderLink'),
             userProfilePic: document.getElementById('userProfilePic'),
             userName: document.getElementById('userName'),
             signOutBtn: document.getElementById('signOutBtn')
@@ -258,6 +261,22 @@ class App {
             e.preventDefault();
             this.showScreen('voiceSettings');
         });
+
+        // Header voice settings link
+        if (this.elements.voiceSettingsHeaderLink) {
+            this.elements.voiceSettingsHeaderLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
+            });
+        }
+
+        // Header guest sign out button
+        if (this.elements.guestSignOutHeaderBtn) {
+            this.elements.guestSignOutHeaderBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exitGuestMode();
+            });
+        }
 
         // Back from voice settings
         this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => this.showScreen('setup'));

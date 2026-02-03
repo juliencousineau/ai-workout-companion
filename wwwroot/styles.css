@@ -163,10 +163,17 @@ button,
     overflow: hidden;
 }
 
-/* Header - Sticky with Backdrop Blur */
+/* Header - Bottom Navigation Bar with Modern Editorial Wellness Aesthetic */
 .header {
-    /* Hidden for pure Aura Editorial aesthetic */
-    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--stone-200);
+    z-index: 100;
+    padding: var(--space-sm) 0;
 }
 
 .header-content {
@@ -174,20 +181,22 @@ button,
     align-items: center;
     justify-content: space-between;
     height: 100%;
-    max-width: 1440px;
+    max-width: 480px;
     margin: 0 auto;
-    padding: 0 var(--space-xl);
+    padding: 0 var(--space-lg);
 }
 
-.app-title {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--stone-900);
-    letter-spacing: -0.01em;
+.logo {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(28, 25, 23, 0.6);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0;
 }
 
-.auth-badge {
+.header-right {
     display: flex;
     align-items: center;
     gap: var(--space-md);
@@ -203,26 +212,30 @@ button,
 }
 
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 1px solid var(--stone-200);
 }
 
 .btn-sign-out {
     background: transparent;
-    color: var(--stone-900);
-    border: 1px solid rgba(28, 25, 23, 0.15);
-    padding: 8px 16px;
+    color: rgba(28, 25, 23, 0.5);
+    border: none;
+    padding: 0;
+    font-family: var(--font-sans);
     font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: color var(--transition-normal);
 }
 
 .btn-sign-out:hover {
-    border-color: var(--sage-500);
-    color: var(--sage-500);
+    color: var(--stone-900);
 }
+
+/* Screens */
 
 .btn-guest {
     background: transparent;

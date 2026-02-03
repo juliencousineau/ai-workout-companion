@@ -19,6 +19,9 @@
             <div class="header-content">
                 <h1 class="logo">🏋️ AI Workout Companion</h1>
                 <div class="header-right">
+                    <!--Voice Settings Link -->
+                    <a href="#" id="voiceSettingsHeaderLink" class="voice-settings-link">⚙️ Voice Settings</a>
+
                     <!-- User Auth Status -->
                     <div id="userAuthSection" class="user-auth">
                         <div id="signedInView" class="user-profile" style="display: none;">
@@ -28,6 +31,13 @@
                         </div>
                         <div id="signedOutView" style="display: none;"></div>
                     </div>
+
+                    <!-- Guest View-->
+                    <div id="guestViewHeader" class="guest-view" style="display: none;">
+                        <span class="guest-label">Guest</span>
+                        <button id="guestSignOutHeaderBtn" class="btn-sign-out">Sign out</button>
+                    </div>
+
                     <!-- Connection Status -->
                     <div class="connection-status" id="connectionStatus">
                         <span class="status-dot disconnected"></span>
