@@ -46,6 +46,10 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
+// Enable authentication and authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Enable API controllers
 app.MapControllers();
 
