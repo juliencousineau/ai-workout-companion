@@ -320,10 +320,10 @@ class VoiceService {
      */
     cleanTextForSpeech(text) {
         return text
-            // Remove specific emojis we use
-            .replace(/[🔥💪⏱️⏱👏🎉✨]/g, '')
-            // Remove any remaining emoji ranges
-            .replace(/[\u{1F000}-\u{1F9FF}]|[\u{2300}-\u{27BF}]|[\u{E000}-\u{F8FF}]|[\u{FE00}-\u{FE0F}]|[\u{1F300}-\u{1FFFF}]/gu, '')
+            // Remove emojis - simple approach using common emoji pattern
+            .replace(/[\u{1F000}-\u{1FFFF}]|[\u{2300}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]/gu, '')
+            // Remove variation selectors (emoji modifiers)
+            .replace(/[\uFE0E\uFE0F]/g, '')
             // Remove markdown bold/italic
             .replace(/\*\*(.*?)\*\*/g, '$1')
             .replace(/\*(.*?)\*/g, '$1')
