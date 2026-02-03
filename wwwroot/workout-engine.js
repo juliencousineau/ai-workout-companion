@@ -24,18 +24,18 @@ class WorkoutEngine {
     // Motivational messages pool
     motivationalMessages = {
         repStart: [
-            "💪 Let's go!",
-            "🔥 You got this!",
-            "⚡ Power up!",
-            "🎯 Focus!",
+            "Let's go!",
+            "You got this!",
+            "Power up!",
+            "Focus!",
         ],
         repComplete: [
-            "Strong start! 💪",
+            "Strong start!",
             "Keep pushing!",
             "Nice and controlled!",
             "You're in the zone!",
             "Great form!",
-            "Beast mode! 🔥",
+            "Beast mode!",
             "Crushing it!",
             "That's the way!",
         ],
@@ -50,18 +50,18 @@ class WorkoutEngine {
             "Final push! You've got this!",
         ],
         setComplete: [
-            "🎉 Set complete! Great work!",
-            "💪 Solid set! Rest up.",
-            "🔥 Crushed that set!",
-            "⭐ Excellent work!",
+            "Set complete! Great work!",
+            "Solid set! Rest up.",
+            "Crushed that set!",
+            "Excellent work!",
         ],
         exerciseComplete: [
-            "🏆 Exercise complete! You crushed it!",
-            "💪 Awesome job on that exercise!",
-            "🎉 Done with that one! Great effort!",
+            "Exercise complete! You crushed it!",
+            "Awesome job on that exercise!",
+            "Done with that one! Great effort!",
         ],
         timerHalfway: [
-            "Halfway there! Stay tight! 💪",
+            "Halfway there! Stay tight!",
             "50% done! Keep holding!",
         ],
         timer30sec: [
@@ -101,7 +101,7 @@ class WorkoutEngine {
 
         // Send welcome message
         const exercise = this.getCurrentExercise();
-        this.sendAIMessage(`🔥 Starting "${this.workoutData.title}" workout!`);
+        this.sendAIMessage(`Starting "${this.workoutData.title}" workout!`);
 
         setTimeout(() => {
             this.announceExercise(exercise);
@@ -135,7 +135,7 @@ class WorkoutEngine {
             exercise.superset_id?.includes('duration') ||
             exercise.duration_seconds > 0;
 
-        let message = `🔥 Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
+        let message = `Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
 
         if (isTimedExercise) {
             const duration = exercise.duration_seconds || 60;
@@ -375,11 +375,11 @@ class WorkoutEngine {
 
             // Announce every 10 seconds
             if (remaining > 0 && remaining % 10 === 0) {
-                this.sendAIMessage(`⏱️ ${remaining} seconds...`);
+                this.sendAIMessage(`${remaining} seconds...`);
             } else if (remaining === 0) {
                 clearInterval(this.restTimerInterval);
                 this.restTimerInterval = null;
-                this.sendAIMessage(`💪 Rest over! Ready for Set ${nextSetNumber}?`);
+                this.sendAIMessage(`Rest over! Ready for Set ${nextSetNumber}?`);
             }
         }, 1000);
     }
@@ -484,7 +484,7 @@ class WorkoutEngine {
      * Skip current exercise
      */
     skipExercise() {
-        this.sendAIMessage("⏭️ Skipping to next exercise...");
+        this.sendAIMessage("Skipping to next exercise...");
         this.moveToNextExercise();
     }
 
@@ -501,7 +501,7 @@ class WorkoutEngine {
         const duration = Math.round((new Date() - this.workoutStartTime) / 1000 / 60);
         const totalSets = this.workoutData.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 
-        this.sendAIMessage(`🎉 **Workout Complete!**\n\n` +
+        this.sendAIMessage(`**Workout Complete!**\n\n` +
             `⏱️ Duration: ${duration} minutes\n` +
             `🏋️ Exercises: ${this.workoutData.exercises.length}\n` +
             `📊 Total Sets: ${totalSets}\n\n` +
@@ -518,13 +518,7 @@ class WorkoutEngine {
      */
     sendAIMessage(content) {
         if (this.onMessage) {
-            // Remove all emojis from message
-            const cleanContent = content
-                .replace(/[\u{1F000}-\u{1FFFF}]|[\u{2300}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]/gu, '')
-                .replace(/[\uFE0E\uFE0F]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-            this.onMessage('ai', cleanContent);
+            this.onMessage('ai', content);
         }
     }
 
