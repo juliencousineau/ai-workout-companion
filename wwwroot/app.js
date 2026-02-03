@@ -130,7 +130,20 @@ class App {
         // Handle speech recognition results
         voiceService.onResult = (transcript) => {
             // Convert word numbers to digits for display
-            const convertedTranscript = workoutEngine.convertWordsToNumbers(transcript.toLowerCase().trim());
+            let convertedTranscript = workoutEngine.convertWordsToNumbers(transcript.toLowerCase().trim());
+
+            // Deduplicate repeated numbers (e.g., "10 10" -> "10")
+            const parts = convertedTranscript.split(/\s+/);
+            const deduplicatedParts = [];
+            let lastPart = null;
+            for (const part of parts) {
+                if (part !== lastPart) {
+                    deduplicatedParts.push(part);
+                    lastPart = part;
+                }
+            }
+            convertedTranscript = deduplicatedParts.join(' ');
+
             this.addMessage('user', convertedTranscript);
             workoutEngine.processInput(transcript);
             this.updateProgressDisplay();
