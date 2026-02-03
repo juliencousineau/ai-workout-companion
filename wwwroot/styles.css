@@ -175,7 +175,19 @@ button,
 
 /* Settings Links Section - Hidden */
 .settings-links-section {
-    display: none;
+    display: none !important;
+}
+
+#voiceSettingsLink {
+    display: none !important;
+}
+
+#guestSignOutBtn {
+    display: none !important;
+}
+
+.guest-view {
+    display: none !important;
 }
 
 /* Header styles (hidden, keeping for compatibility) */
