@@ -4,20 +4,115 @@ description: Create distinctive, production-grade frontend interfaces with high 
 license: Complete terms in LICENSE.txt
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Frontend Design Skill
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+## Purpose
+Create visually striking, production-ready frontend code that avoids "AI slop" - generic, templated designs that all look the same. This skill pushes you to make bold, memorable aesthetic choices informed by real design trends.
 
-## Design Thinking
+## Core Principles
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+### 1. **Commit to a Bold Aesthetic Direction**
+Don't hedge. Don't make "nice" but forgettable interfaces. Examples:
+- **Editorial Wellness** (Aura-style): Stone/Sage palette, generous white space, Newsreader serif + Satoshi sans-serif, NO hover animations
+- **Athletic Brutalist**: Compressed athletic fonts, electric cyan accents, sharp angles
+- **Luxury Minimalist**: High contrast, sophisticated serifs, subtle animations
+- **Neo-Brutalism**: Bold borders, clashing colors, raw typography
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+Pick ONE direction and commit fully.
 
+### 2. **Typography Drives the Aesthetic**
+The font choice is 50% of the design. Avoid the obvious:
+- ❌ **Generic**: Inter, Roboto, default system fonts
+- ✅ **Distinctive**: Newsreader, Satoshi, custom font pairings from Google Fonts or Fontshare
+
+Use **italic accents** for editorial elegance (e.g., "Wellness, *curated.*")
+
+### 3. **Avoid Cliched Color Schemes**
+Especially avoid:
+- Purple gradients (overused in AI/tech)
+- Generic blue (#007bff)
+- Plain black/white without texture
+
+Instead:
+- **Stone/Sage** (#FBF9F6 / #8DA399) for wellness
+- **Electric cyan** (#00E5FF) for athletic energy
+- **Warm terracotta** (#E07A5F) for organic feel
+
+### 4. **Motion Should Be Purposeful (or Absent)**
+- **For editorial/wellness**: **NO hover animations**. Buttons don't lift, cards don't grow. Static is sophisticated.
+- **For energetic brands**: Sharp, snappy micro-interactions
+- Never use generic fade-ins or slow transitions unless specifically justified
+
+### 5. **Spatial Composition**
+- **Generous white space** for editorial (Aura-style)
+- **Overlapping elements** for brutalism
+- **Asymmetric grids** for modern feel
+- **Hero layouts**: 5-column text + 7-column visual (not centered)
+
+## Example: Aura Editorial Wellness Design
+
+```html
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Wellness,<br><span class="title-accent">curated.</span>
+        </h1>
+        <p class="hero-description">
+            A deliberate approach to daily consistency. No fillers,
+            no noise—just the essential compounds your body recognizes.
+        </p>
+        <div class="hero-actions">
+            <button class="btn-primary">Shop Regimens</button>
+            <a href="#" class="link-secondary">Browse All Supplements →</a>
+        </div>
+    </div>
+    <div class="hero-visual"></div>
+</div>
+```
+
+```css
+:root {
+    --stone-50: #FBF9F6;
+    --stone-900: #1C1917;
+    --sage-500: #8DA399;
+    --font-serif: 'Newsreader', serif;
+    --font-sans: 'Satoshi', sans-serif;
+}
+
+.hero-section {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 64px;
+    padding: 64px 32px;
+    min-height: 80vh;
+}
+
+.hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--stone-900);
+}
+
+.title-accent {
+    font-style: italic;
+}
+
+.btn-primary {
+    padding: 14px 28px;
+    background: var(--stone-900);
+    color: var(--stone-50);
+    border: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    /* NO HOVER ANIMATION */
+}
+```
+
+## Implementation Checklist
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 - Production-grade and functional
 - Visually striking and memorable
