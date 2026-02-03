@@ -163,37 +163,19 @@ button,
     overflow: hidden;
 }
 
-/* Footer - Centered Voice Settings */
+/* Header - Hidden */
+.header {
+    display: none;
+}
+
+/* Footer - Hidden */
 .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--stone-200);
-    z-index: 100;
-    padding: var(--space-md) 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: none;
 }
 
-.voice-settings-footer-link {
-    font-family: var(--font-sans);
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgba(28, 25, 23, 0.6);
-    text-decoration: none;
-    transition: color var(--transition-normal);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.voice-settings-footer-link:hover {
-    color: var(--stone-900);
+/* Settings Links Section - Hidden */
+.settings-links-section {
+    display: none;
 }
 
 /* Header styles (hidden, keeping for compatibility) */
