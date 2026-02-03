@@ -131,21 +131,16 @@ class WorkoutEngine {
     announceExercise(exercise) {
         if (!exercise) return;
 
+        // Debug: Log the exercise structure to understand API fields
+        console.log('Exercise data from API:', JSON.stringify(exercise, null, 2));
+
         const sets = exercise.sets?.length || 3;
 
-        // Common timed exercise names
-        const timedExerciseNames = ['plank', 'wall sit', 'dead hang', 'hollow hold', 'side plank'];
-        const exerciseName = (exercise.title || exercise.exercise_template_id || '').toLowerCase();
-        const isNamedTimedExercise = timedExerciseNames.some(name => exerciseName.includes(name));
-
-        // Check if duration is specified in the first set
+        // Check if duration is specified in the first set (from API)
         const firstSetDuration = exercise.sets?.[0]?.duration_seconds || 0;
 
-        const isTimedExercise = exercise.exercise_type === 'duration' ||
-            exercise.superset_id?.includes('duration') ||
-            exercise.duration_seconds > 0 ||
-            isNamedTimedExercise ||
-            firstSetDuration > 0;
+        // Detect timed exercises using ONLY API data (no hardcoded names)
+        const isTimedExercise = firstSetDuration > 0;
 
         let message = `Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
 
