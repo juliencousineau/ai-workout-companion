@@ -40,33 +40,44 @@ class VoiceService {
      */
     setupRecognitionHandlers() {
         this.recognition.onresult = (event) => {
-            const result = event.results[0];
-            if (result.isFinal) {
-                const transcript = result[0].transcript.trim();
-                console.log('Speech recognized:', transcript);
+            const result = event.results[event.results.length - 1];
+            const transcript = result[0].transcript.trim();
 
-                // Only process meaningful input (ignore noise/short sounds)
-                if (transcript.length < 2) {
-                    return;
-                }
-
-                // Filter out self-hearing words, keep user input
-                const cleanedTranscript = this.filterSelfHearing(transcript);
-                if (!cleanedTranscript) {
-                    console.log('Filtered out self-hearing:', transcript);
-                    return;
-                }
-
-                // Stop AI speech if user interrupts with real input
-                if (this.isSpeaking) {
+            // Handle interim results for fast interruption
+            if (!result.isFinal) {
+                // If AI is speaking and user says anything, stop AI immediately
+                if (this.isSpeaking && transcript.length > 2) {
+                    console.log('Interim result detected, stopping AI:', transcript);
                     this.stopSpeaking();
                 }
+                return;
+            }
 
-                if (this.onResult) {
-                    this.onResult(cleanedTranscript);
-                }
+            // Final result - process normally
+            console.log('Speech recognized:', transcript);
+
+            // Only process meaningful input (ignore noise/short sounds)
+            if (transcript.length < 2) {
+                return;
+            }
+
+            // Filter out self-hearing words, keep user input
+            const cleanedTranscript = this.filterSelfHearing(transcript);
+            if (!cleanedTranscript) {
+                console.log('Filtered out self-hearing:', transcript);
+                return;
+            }
+
+            // Stop AI speech if user interrupts with real input
+            if (this.isSpeaking) {
+                this.stopSpeaking();
+            }
+
+            if (this.onResult) {
+                this.onResult(cleanedTranscript);
             }
         };
+
 
         this.recognition.onstart = () => {
             this.isListening = true;
