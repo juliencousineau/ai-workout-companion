@@ -139,7 +139,7 @@ class WorkoutEngine {
         const isNamedTimedExercise = timedExerciseNames.some(name => exerciseName.includes(name));
 
         // Check if duration is specified in the first set
-        const firstSetDuration = exercise.sets?.[0]?.duration_seconds || exercise.sets?.[0]?.weight_kg;
+        const firstSetDuration = exercise.sets?.[0]?.duration_seconds || 0;
 
         const isTimedExercise = exercise.exercise_type === 'duration' ||
             exercise.superset_id?.includes('duration') ||
