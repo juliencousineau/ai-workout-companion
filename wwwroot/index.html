@@ -19,12 +19,8 @@
             <div class="header-content">
                 <h1 class="logo">🏋️ AI Workout Companion</h1>
                 <div class="header-right">
-                    <!-- User Auth -->
+                    <!-- User Auth Status -->
                     <div id="userAuthSection" class="user-auth">
-                        <div id="signedOutView" style="display: none;">
-                            <div id="googleSignInBtn"></div>
-                            <button id="continueAsGuestBtn" class="btn-guest">Continue as Guest</button>
-                        </div>
                         <div id="signedInView" class="user-profile" style="display: none;">
                             <img id="userProfilePic" class="user-avatar" alt="User">
                             <span id="userName"></span>
@@ -47,6 +43,32 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Welcome Screen (Sign Up / Guest) -->
+            <div id="welcomeScreen" class="screen active">
+                <div class="welcome-container">
+                    <div class="welcome-header">
+                        <h1 class="welcome-title">🏋️ AI Workout Companion</h1>
+                        <p class="welcome-subtitle">Your personal AI-powered workout guide</p>
+                    </div>
+
+                    <div class="auth-options">
+                        <div id="googleSignInBtn" class="google-signin-container"></div>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <button id="continueAsGuestBtn" class="btn btn-secondary btn-large">
+                            👤 Continue as Guest
+                        </button>
+
+                        <p class="auth-note">
+                            Sign in to sync your settings across devices
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Setup Screen -->
             <div id="setupScreen" class="screen active">
                 <!-- Provider Selection View -->

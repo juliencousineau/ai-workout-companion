@@ -279,6 +279,75 @@ body {
     }
 }
 
+/* Welcome Screen */
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: var(--space-2xl);
+    text-align: center;
+}
+
+.welcome-header {
+    margin-bottom: var(--space-2xl);
+}
+
+.welcome-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--space-md);
+}
+
+.welcome-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.auth-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    width: 100%;
+    max-width: 400px;
+}
+
+.google-signin-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-note {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: var(--space-sm);
+}
+
 /* Setup Screen */
 .setup-view {
     flex: 1;

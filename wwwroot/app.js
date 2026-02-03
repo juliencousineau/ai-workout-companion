@@ -5,6 +5,7 @@
 class App {
     constructor() {
         this.screens = {
+            welcome: document.getElementById('welcomeScreen'),
             setup: document.getElementById('setupScreen'),
             voiceSettings: document.getElementById('voiceSettingsScreen'),
             workoutSelect: document.getElementById('workoutSelectScreen'),
@@ -44,7 +45,6 @@ class App {
             testVoiceBtn: document.getElementById('testVoiceBtn'),
             // Auth elements
             googleSignInBtn: document.getElementById('googleSignInBtn'),
-            signedOutView: document.getElementById('signedOutView'),
             signedInView: document.getElementById('signedInView'),
             guestView: document.getElementById('guestView'),
             continueAsGuestBtn: document.getElementById('continueAsGuestBtn'),
@@ -99,6 +99,7 @@ class App {
         // Check if already authenticated
         if (authService.isAuthenticated()) {
             this.showUserProfile(authService.getUser());
+            this.showScreen('setup'); // Skip welcome, go to setup
             return;
         }
 
@@ -108,17 +109,18 @@ class App {
             return;
         }
 
-        // Show sign-in options
-        this.elements.signedOutView.style.display = 'flex';
+        // Show welcome screen for auth selection
+        this.showScreen('welcome');
 
         // Only initialize Google if Client ID is configured
         if (clientId) {
             try {
                 await authService.initGoogle(clientId);
                 authService.renderGoogleButton('googleSignInBtn', {
-                    theme: 'outline',
-                    size: 'medium',
-                    text: 'signin'
+                    theme: 'filled_blue',
+                    size: 'large',
+                    text: 'signin_with',
+                    width: 280
                 });
             } catch (error) {
                 console.warn('Google Auth not available:', error);
@@ -135,8 +137,8 @@ class App {
     enterGuestMode() {
         this.isGuestMode = true;
         localStorage.setItem('guest_mode', 'true');
-        this.elements.signedOutView.style.display = 'none';
         this.elements.guestView.style.display = 'block';
+        this.showScreen('setup');
     }
 
     /**
@@ -148,6 +150,8 @@ class App {
         userSettingsService.loadSettings().then(() => {
             this.loadVoiceSettings();
         });
+        // Navigate to setup screen
+        this.showScreen('setup');
     }
 
     /**
