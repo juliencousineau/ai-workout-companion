@@ -102,33 +102,3 @@ Background: Stone 900; Text: Stone 50; Padding: 16px 32px; Radius: 6px. Content:
 Clinical but aesthetic data display.
 
 Container: bg-sage-50, p-16. Use a 1px solid border-b for rows. Font: Satoshi Mono or similar system-mono. Columns: Ingredient Name (Left, 400 weight), Dosage (Right, 700 weight). Bottom section includes 'Intentionally Excluded' list in uppercase tracking-widest text.
-
----
-
-# Summary
-
-Create a high-end wellness e-commerce site ('Aura') that balances minimal aesthetics with clinical transparency. The design uses a 'Stone' and 'Sage' color palette, elegant typography (Gambetta and Satoshi), and a structured layout that guides the user through curated product regimens rather than individual items. It prioritizes white space, soft shadows, and smooth transitions to establish a sense of tranquility and professionalism.
-
-# Style
-
-The style is 'Modern Editorial Wellness'. It uses a light stone background (#FBF9F6) to reduce visual fatigue and a muted sage green (#8DA399) for subtle action cues. Typography is a sophisticated pairing of the serif 'Gambetta' for headlines and 'Satoshi' for functional text. Animations are limited to gentle scale shifts (105%), smooth transitions (300ms), and backdrop blurs.
-
-## Spec
-
-Color Palette: Background Stone 50 (#FBF9F6), Borders Stone 200 (#EBE5DE), Text Stone 900 (#1C1917), Accent Sage 500 (#8DA399). Typography: Headlines in Gambetta (Serif), Weights 400-700; Body/Nav in Satoshi (Sans-serif), Weights 300-700. Layout Spacing: 1440px max width, 6-12 unit padding on sections. Shadows: Very soft shadow-lg (rgba(141, 163, 153, 0.2)) on hover states. Borders: 1px solid with 50% opacity for a 'barely-there' feel. Animations: 'ease-in-out' 300ms for color changes, 2000ms slow scale zoom on lifestyle images. Micro-interactions: Cards should translate +4px on X-axis or Y-axis on hover to indicate clickability.
-
-# Layout & Structure
-
-A multi-layered vertical scroll that transitions from high-level lifestyle messaging to granular product details and ending with deep trust signals.
-
-## Reassurance Strip & Header
-
-Top-bar reassurance strip: Height 40px, Stone 100 background, 10px uppercase tracking-widest text. Sticky Header: Height 96px, 90% opacity Stone 50 with backdrop-blur-md. Logo left (Serif 3xl), Nav center (Sans-serif 14px uppercase tracking-wider), Actions right (Cart icon with notification dot).
-
-## Hero Section
-
-12-column grid. Left 5 columns: H1 Serif text-7xl with an italicized accent word; P light text-xl leading-relaxed; Button group (Primary: Stone 900, Secondary: Ghost button with arrow icon). Right 7 columns: Aspect-ratio 4:5 image container with 8px border-radius and a soft sage-glow decorative blur behind the bottom-left corner.
-
-## Regimen Selector
-
-Goal-oriented bento grid. Five cards across. Each card: 24px padding, 8px radius. One card should be 'Active/Featured' using Stone 800 background and
