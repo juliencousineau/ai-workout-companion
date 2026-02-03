@@ -77,15 +77,6 @@ class VoiceService {
                 return;
             }
 
-            // Additional check: ignore short non-number phantom inputs
-            // These are often mishearings like "rock", "favorite" when AI is speaking
-            const words = cleanedTranscript.trim().split(/\s+/);
-            if (words.length === 1 && !/\d/.test(cleanedTranscript)) {
-                // Single word with no digits - likely phantom recognition
-                console.log('Ignoring short non-number input:', cleanedTranscript);
-                return;
-            }
-
             // Stop AI speech if user interrupts with real input
             if (this.isSpeaking) {
                 this.stopSpeaking();
@@ -308,6 +299,17 @@ class VoiceService {
         if (this.synthesis) {
             this.synthesis.cancel();
             this.isSpeaking = false;
+
+            // Restart recognition to clear audio buffer containing old AI speech
+            if (this.continuousMode && this.isListening) {
+                console.log('Restarting recognition to clear buffer after AI stop');
+                try {
+                    this.recognition.stop();
+                    // Recognition will auto-restart via onend handler
+                } catch (e) {
+                    console.error('Error restarting recognition:', e);
+                }
+            }
         }
     }
 
