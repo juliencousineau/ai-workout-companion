@@ -144,7 +144,7 @@ class WorkoutEngine {
         if (isTimedExercise) {
             const duration = exercise.duration_seconds || firstSetDuration || 30;
             message += ` (${sets} sets × ${duration} seconds).\n`;
-            message += `Ready for Set 1? Say 'yes' to start the timer!`;
+            message += `Ready for Set 1? Say 'yes' or 'start the timer'!`;
             this.isCountdown = true;
             this.timerSeconds = duration;
         } else {
