@@ -49,11 +49,6 @@
             </div>
         </header>
 
-        <!-- Footer - Voice Settings -->
-        <footer class="footer">
-            <a href="#" id="voiceSettingsFooterLink" class="voice-settings-footer-link">⚙️ Voice Settings</a>
-        </footer>
-
         <!-- Main Content -->
         <main class="main-content">
             <!-- Welcome Screen (Sign Up / Guest) -->
@@ -242,6 +237,35 @@
                 </div>
             </div>
         </main>
+
+        <!-- Footer Menu (Static - Not Sticky) -->
+        <footer class="footer">
+            <div class="footer-content">
+                <!-- Voice Settings Link -->
+                <a href="#" id="voiceSettingsFooterLink" class="footer-link">
+                    <span class="footer-link-icon">⚙️</span>
+                    <span class="footer-link-text">Voice Settings</span>
+                </a>
+
+                <!-- Connection Status -->
+                <div id="connectionStatusFooter" class="footer-status" style="display: none;">
+                    <span class="footer-status-dot"></span>
+                    <span class="footer-status-text" id="connectionStatusFooterText">Connected</span>
+                </div>
+
+                <!-- User Info (Signed In) -->
+                <div id="userInfoFooter" class="footer-user-info" style="display: none;">
+                    <img id="userProfilePicFooter" class="footer-user-avatar" src="" alt="User">
+                    <span id="userNameFooter" class="footer-user-name"></span>
+                </div>
+
+                <!-- Guest Info -->
+                <div id="guestInfoFooter" class="footer-guest-info" style="display: none;">
+                    <span class="footer-guest-label">Guest</span>
+                    <a href="#" id="guestSignOutFooterBtn" class="footer-link-secondary">Sign out</a>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="crypto-utils.js"></script>

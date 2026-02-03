@@ -56,7 +56,16 @@ class App {
             voiceSettingsFooterLink: document.getElementById('voiceSettingsFooterLink'),
             userProfilePic: document.getElementById('userProfilePic'),
             userName: document.getElementById('userName'),
-            signOutBtn: document.getElementById('signOutBtn')
+            signOutBtn: document.getElementById('signOutBtn'),
+
+            // Footer menu elements
+            connectionStatusFooter: document.getElementById('connectionStatusFooter'),
+            connectionStatusFooterText: document.getElementById('connectionStatusFooterText'),
+            userInfoFooter: document.getElementById('userInfoFooter'),
+            userProfilePicFooter: document.getElementById('userProfilePicFooter'),
+            userNameFooter: document.getElementById('userNameFooter'),
+            guestInfoFooter: document.getElementById('guestInfoFooter'),
+            guestSignOutFooterBtn: document.getElementById('guestSignOutFooterBtn')
         };
 
         this.isGuestMode = false;
@@ -151,8 +160,16 @@ class App {
      */
     enterGuestMode() {
         this.isGuestMode = true;
-        localStorage.setItem('guest_mode', 'true');
-        this.elements.guestView.style.display = 'block';
+        localStorage.setItem('isGuestMode', 'true');
+        this.elements.guestView.style.display = 'flex';
+        this.elements.guestViewHeader.style.display = 'flex';
+        // Update footer
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'flex';
+        }
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'none';
+        }
         this.showScreen('setup');
     }
 
@@ -161,8 +178,13 @@ class App {
      */
     exitGuestMode() {
         this.isGuestMode = false;
-        localStorage.removeItem('guest_mode');
+        localStorage.removeItem('isGuestMode');
         this.elements.guestView.style.display = 'none';
+        this.elements.guestViewHeader.style.display = 'none';
+        // Update footer
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'none';
+        }
         this.showScreen('welcome');
     }
 
@@ -185,6 +207,10 @@ class App {
     handleSignOut() {
         this.elements.signedInView.style.display = 'none';
         this.elements.signedOutView.style.display = 'block';
+        // Update footer
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'none';
+        }
     }
 
     /**
@@ -196,6 +222,17 @@ class App {
         this.elements.userName.textContent = user.name;
         if (user.profilePictureUrl) {
             this.elements.userProfilePic.src = user.profilePictureUrl;
+        }
+        // Update footer
+        if (this.elements.userInfoFooter) {
+            this.elements.userInfoFooter.style.display = 'flex';
+            this.elements.userNameFooter.textContent = user.name;
+            if (user.profilePictureUrl) {
+                this.elements.userProfilePicFooter.src = user.profilePictureUrl;
+            }
+        }
+        if (this.elements.guestInfoFooter) {
+            this.elements.guestInfoFooter.style.display = 'none';
         }
     }
 
@@ -284,6 +321,22 @@ class App {
             this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.showScreen('voiceSettings');
+            });
+        }
+
+        // Footer voice settings link
+        if (this.elements.voiceSettingsFooterLink) {
+            this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showScreen('voiceSettings');
+            });
+        }
+
+        // Footer guest sign out button
+        if (this.elements.guestSignOutFooterBtn) {
+            this.elements.guestSignOutFooterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exitGuestMode();
             });
         }
 
@@ -544,11 +597,21 @@ class App {
             dot.classList.add('connected');
             text.textContent = 'Connected';
             this.elements.disconnectBtn.style.display = 'inline-block';
+            // Update footer
+            if (this.elements.connectionStatusFooter) {
+                this.elements.connectionStatusFooter.style.display = 'flex';
+                this.elements.connectionStatusFooter.classList.remove('disconnected');
+                this.elements.connectionStatusFooterText.textContent = 'Connected';
+            }
         } else {
             dot.classList.remove('connected');
             dot.classList.add('disconnected');
             text.textContent = 'Not Connected';
             this.elements.disconnectBtn.style.display = 'none';
+            // Update footer
+            if (this.elements.connectionStatusFooter) {
+                this.elements.connectionStatusFooter.style.display = 'none';
+            }
         }
     }
 

@@ -168,12 +168,120 @@ button,
     display: none;
 }
 
-/* Footer - Hidden */
+/* Footer Menu - Static (Not Sticky) */
 .footer {
-    display: none;
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin: var(--space-xl) auto 0;
+    padding: var(--space-lg) var(--space-md);
+    border-top: 1px solid var(--stone-200);
+    background: transparent;
 }
 
-/* Settings Links Section - Hidden */
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: flex-start;
+}
+
+/* Footer Links */
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: rgba(28, 25, 23, 0.6);
+    text-decoration: none;
+    transition: color var(--transition-normal);
+    cursor: pointer;
+}
+
+.footer-link:hover {
+    color: rgba(28, 25, 23, 0.9);
+}
+
+.footer-link-icon {
+    font-size: 1rem;
+}
+
+.footer-link-text {
+    line-height: 1;
+}
+
+/* Connection Status */
+.footer-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: rgba(28, 25, 23, 0.5);
+}
+
+.footer-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green-600);
+}
+
+.footer-status.disconnected .footer-status-dot {
+    background: var(--stone-400);
+}
+
+/* User Info */
+.footer-user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.footer-user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.footer-user-name {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(28, 25, 23, 0.7);
+}
+
+/* Guest Info */
+.footer-guest-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.footer-guest-label {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(28, 25, 23, 0.5);
+}
+
+.footer-link-secondary {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: rgba(28, 25, 23, 0.5);
+    text-decoration: none;
+    transition: color var(--transition-normal);
+}
+
+.footer-link-secondary:hover {
+    color: rgba(28, 25, 23, 0.8);
+}
+
+/* Settings Links Section - Hidden (Old) */
 .settings-links-section {
     display: none !important;
 }
@@ -188,11 +296,6 @@ button,
 
 .guest-view {
     display: none !important;
-}
-
-/* Header styles (hidden, keeping for compatibility) */
-.header {
-    display: none;
 }
 
 .header-content {
