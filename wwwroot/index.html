@@ -50,12 +50,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Voice Selection -->
-                    <div class="voice-selector-section">
-                        <h3 class="voice-selector-title">Select TTS Voice</h3>
-                        <select id="voiceSelect" class="voice-select">
-                            <option value="">Loading voices...</option>
-                        </select>
+                    <!-- Voice Settings Link -->
+                    <div class="voice-settings-link-section">
+                        <a href="#" id="voiceSettingsLink" class="voice-settings-link">⚙️ Voice Settings</a>
                     </div>
                 </div>
 
@@ -76,6 +73,50 @@
                         </div>
                         <p class="note" id="providerFormNote">Requires Hevy Pro subscription</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Voice Settings Screen -->
+            <div id="voiceSettingsScreen" class="screen">
+                <div class="voice-settings-card">
+                    <button id="backFromVoiceSettingsBtn" class="btn-back">← Back</button>
+                    <h2 class="voice-settings-title">Voice Settings</h2>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">Voice</label>
+                        <select id="voiceSelect" class="voice-select">
+                            <option value="">Loading voices...</option>
+                        </select>
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Pitch
+                            <span class="voice-setting-value" id="pitchValue">1.05</span>
+                        </label>
+                        <input type="range" id="pitchSlider" class="voice-slider" min="0.5" max="2" step="0.05"
+                            value="1.05">
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Rate
+                            <span class="voice-setting-value" id="rateValue">1.2</span>
+                        </label>
+                        <input type="range" id="rateSlider" class="voice-slider" min="0.5" max="2" step="0.1"
+                            value="1.2">
+                    </div>
+
+                    <div class="voice-setting-group">
+                        <label class="voice-setting-label">
+                            Volume
+                            <span class="voice-setting-value" id="volumeValue">1.0</span>
+                        </label>
+                        <input type="range" id="volumeSlider" class="voice-slider" min="0" max="1" step="0.1"
+                            value="1.0">
+                    </div>
+
+                    <button id="testVoiceBtn" class="btn btn-primary btn-large">Test Voice</button>
                 </div>
             </div>
 
@@ -146,6 +187,7 @@
         </main>
     </div>
 
+    <script src="crypto-utils.js"></script>
     <script src="providers/provider-interface.js"></script>
     <script src="providers/provider-manager.js"></script>
     <script src="providers/hevy-provider.js"></script>

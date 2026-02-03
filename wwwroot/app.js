@@ -6,6 +6,7 @@ class App {
     constructor() {
         this.screens = {
             setup: document.getElementById('setupScreen'),
+            voiceSettings: document.getElementById('voiceSettingsScreen'),
             workoutSelect: document.getElementById('workoutSelectScreen'),
             chat: document.getElementById('chatScreen'),
             complete: document.getElementById('completeScreen')
@@ -31,7 +32,16 @@ class App {
             connectionFormView: document.getElementById('connectionFormView'),
             backToProvidersBtn: document.getElementById('backToProvidersBtn'),
             providerCards: document.querySelectorAll('.provider-card:not(.disabled)'),
-            voiceSelect: document.getElementById('voiceSelect')
+            voiceSettingsLink: document.getElementById('voiceSettingsLink'),
+            backFromVoiceSettingsBtn: document.getElementById('backFromVoiceSettingsBtn'),
+            voiceSelect: document.getElementById('voiceSelect'),
+            pitchSlider: document.getElementById('pitchSlider'),
+            pitchValue: document.getElementById('pitchValue'),
+            rateSlider: document.getElementById('rateSlider'),
+            rateValue: document.getElementById('rateValue'),
+            volumeSlider: document.getElementById('volumeSlider'),
+            volumeValue: document.getElementById('volumeValue'),
+            testVoiceBtn: document.getElementById('testVoiceBtn')
         };
 
         this.selectedRoutine = null;
@@ -48,6 +58,7 @@ class App {
         this.setupWorkoutEngine();
         this.setupVoiceService();
         this.populateVoiceSelector();
+        this.loadVoiceSettings();
 
         // Check for saved provider credentials
         const hasCredentials = providerManager.loadSavedProvider();
@@ -98,8 +109,46 @@ class App {
         // Back to providers button
         this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
 
+        // Voice settings link
+        this.elements.voiceSettingsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showScreen('voiceSettings');
+        });
+
+        // Back from voice settings
+        this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => this.showScreen('setup'));
+
         // Voice selector
         this.elements.voiceSelect.addEventListener('change', (e) => this.handleVoiceChange(e.target.value));
+
+        // Pitch slider
+        this.elements.pitchSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.pitchValue.textContent = value.toFixed(2);
+            voiceService.pitch = value;
+            localStorage.setItem('tts_pitch', value);
+        });
+
+        // Rate slider
+        this.elements.rateSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.rateValue.textContent = value.toFixed(1);
+            voiceService.rate = value;
+            localStorage.setItem('tts_rate', value);
+        });
+
+        // Volume slider
+        this.elements.volumeSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.elements.volumeValue.textContent = value.toFixed(1);
+            voiceService.volume = value;
+            localStorage.setItem('tts_volume', value);
+        });
+
+        // Test voice button
+        this.elements.testVoiceBtn.addEventListener('click', () => {
+            voiceService.speak('This is a test of your voice settings. How does it sound?');
+        });
     }
 
     /**
@@ -189,7 +238,7 @@ class App {
 
             // Clear and populate dropdown
             this.elements.voiceSelect.innerHTML = '';
-            
+
             // Get current voice name
             const savedVoiceName = localStorage.getItem('tts_voice') || voiceService.voice?.name;
 
@@ -213,6 +262,29 @@ class App {
      */
     handleVoiceChange(voiceName) {
         voiceService.setVoiceByName(voiceName);
+    }
+
+    /**
+     * Load saved voice settings from localStorage
+     */
+    loadVoiceSettings() {
+        // Load pitch
+        const savedPitch = parseFloat(localStorage.getItem('tts_pitch') || '1.05');
+        this.elements.pitchSlider.value = savedPitch;
+        this.elements.pitchValue.textContent = savedPitch.toFixed(2);
+        voiceService.pitch = savedPitch;
+
+        // Load rate
+        const savedRate = parseFloat(localStorage.getItem('tts_rate') || '1.2');
+        this.elements.rateSlider.value = savedRate;
+        this.elements.rateValue.textContent = savedRate.toFixed(1);
+        voiceService.rate = savedRate;
+
+        // Load volume
+        const savedVolume = parseFloat(localStorage.getItem('tts_volume') || '1.0');
+        this.elements.volumeSlider.value = savedVolume;
+        this.elements.volumeValue.textContent = savedVolume.toFixed(1);
+        voiceService.volume = savedVolume;
     }
 
     /**

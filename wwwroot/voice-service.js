@@ -23,6 +23,11 @@ class VoiceService {
         this.voice = null;
         this.loadVoices();
 
+        // Voice settings - load from localStorage or use defaults
+        this.pitch = parseFloat(localStorage.getItem('tts_pitch')) || 1.05;
+        this.rate = parseFloat(localStorage.getItem('tts_rate')) || 1.2;
+        this.volume = parseFloat(localStorage.getItem('tts_volume')) || 1.0;
+
         // State
         this.isListening = false;
         this.isSpeaking = false;
@@ -299,9 +304,9 @@ class VoiceService {
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.voice = this.voice;
-        utterance.rate = options.rate || 1.2;  // Faster, more energetic
-        utterance.pitch = options.pitch || 1.05;  // Slightly higher, more upbeat
-        utterance.volume = options.volume || 1.0;
+        utterance.rate = this.rate;
+        utterance.pitch = this.pitch;
+        utterance.volume = this.volume;
 
         utterance.onstart = () => {
             this.isSpeaking = true;
@@ -416,6 +421,26 @@ class VoiceService {
 
         // Return cleaned transcript with only user words
         return userWords.join(' ');
+    }
+
+    /**
+     * Get available voices
+     */
+    getAvailableVoices() {
+        return this.synthesis ? this.synthesis.getVoices() : [];
+    }
+
+    /**
+     * Set voice by name
+     */
+    setVoiceByName(voiceName) {
+        const voices = this.getAvailableVoices();
+        const selectedVoice = voices.find(v => v.name === voiceName);
+        if (selectedVoice) {
+            this.voice = selectedVoice;
+            localStorage.setItem('tts_voice', voiceName);
+            console.log('Voice changed to:', voiceName);
+        }
     }
 }
 
