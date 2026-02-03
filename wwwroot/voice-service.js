@@ -10,7 +10,7 @@ class VoiceService {
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
             this.recognition.continuous = false;
-            this.recognition.interimResults = false;
+            this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
             this.setupRecognitionHandlers();
         } else {
