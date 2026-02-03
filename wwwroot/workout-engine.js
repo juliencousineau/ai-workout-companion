@@ -186,6 +186,16 @@ class WorkoutEngine {
             return this.skipExercise();
         }
 
+        // Check for exercise instructions
+        if (normalizedInput.includes('how') || normalizedInput === 'instructions' || normalizedInput === 'help') {
+            const exercise = this.getCurrentExercise();
+            if (exercise?.notes) {
+                return this.sendAIMessage(`Here's how to do ${exercise.title}: ${exercise.notes}`);
+            } else {
+                return this.sendAIMessage(`I don't have specific instructions for this exercise.`);
+            }
+        }
+
         // Convert spoken word numbers to digits
         const convertedInput = this.convertWordsToNumbers(normalizedInput);
 
