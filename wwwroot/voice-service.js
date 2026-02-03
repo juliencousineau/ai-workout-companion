@@ -248,6 +248,7 @@ class VoiceService {
 
         // Clean text for speech (remove markdown, emojis, etc.)
         const cleanText = this.cleanTextForSpeech(text);
+        console.log('TTS - Original:', text, '→ Cleaned:', cleanText);
         if (!cleanText) return;
 
         // Track sentence being spoken for self-hearing detection
