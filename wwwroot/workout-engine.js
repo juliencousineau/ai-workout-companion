@@ -150,7 +150,7 @@ class WorkoutEngine {
         } else {
             const reps = exercise.reps || 10;
             message += ` (${sets} sets × ${reps} reps).\n`;
-            message += `Tell me after each rep - I'll count down with you!`;
+            message += `Ready for Set 1? Say 'yes' or 'go'!`;
             this.isCountdown = false;
             this.targetReps = reps;
             this.currentRep = 0;
@@ -175,7 +175,7 @@ class WorkoutEngine {
             if (this.isCountdown) {
                 return this.startTimer();
             }
-            return this.sendAIMessage("Let's go! Tell me your rep count.");
+            return this.sendAIMessage("Let's go! Tell me after each rep - I'll count down with you!.");
         }
 
         // Check for repeat request
