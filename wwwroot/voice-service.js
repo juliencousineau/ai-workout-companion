@@ -338,9 +338,18 @@ class VoiceService {
     filterSelfHearing(transcript) {
         // Clean up old sentences first
         const now = Date.now();
-        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 3000);
+        const beforeCount = this.recentSentences.length;
+        this.recentSentences = this.recentSentences.filter(s => now - s.timestamp < 5000);
+        const afterCount = this.recentSentences.length;
 
-        if (this.recentSentences.length === 0) return transcript;
+        if (beforeCount > afterCount) {
+            console.log(`Expired ${beforeCount - afterCount} sentences from recentSentences`);
+        }
+
+        if (this.recentSentences.length === 0) {
+            console.log('No recent sentences to filter against');
+            return transcript;
+        }
 
         // Strip punctuation from words for comparison
         const stripPunctuation = (word) => word.replace(/[.,!?;:]/g, '');
