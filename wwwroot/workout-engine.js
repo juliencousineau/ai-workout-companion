@@ -444,7 +444,10 @@ class WorkoutEngine {
             this.sendAIMessage(`${this.getMotivation('setComplete')}\n${this.getMotivation('exerciseComplete')}`);
             this.moveToNextExercise();
         } else {
-            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest up. Ready for Set ${this.currentSetIndex + 1}?`);
+            // Start rest timer between sets
+            const restSeconds = exercise?.sets?.[this.currentSetIndex]?.rest_seconds || 60;
+            this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
+            this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         }
     }
 
