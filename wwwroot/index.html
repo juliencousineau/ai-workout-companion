@@ -26,10 +26,6 @@
                             <span id="userName"></span>
                             <button id="signOutBtn" class="btn-sign-out">Sign Out</button>
                         </div>
-                        <div id="guestView" class="guest-badge" style="display: none;">
-                            <span class="guest-text">Guest</span>
-                            <button id="guestSignOutBtn" class="btn-icon" title="Sign out">×</button>
-                        </div>
                     </div>
                     <!-- Connection Status -->
                     <div class="connection-status" id="connectionStatus">
@@ -92,8 +88,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Voice Settings Link -->
-                    <div class="voice-settings-link-section">
+                    <!-- Guest Mode & Voice Settings Section -->
+                    <div class="settings-links-section">
+                        <div id="guestView" class="guest-view" style="display: none;">
+                            <span class="guest-label">Guest</span>
+                            <a href="#" id="guestSignOutBtn" class="link-secondary">Sign out</a>
+                        </div>
                         <a href="#" id="voiceSettingsLink" class="voice-settings-link">⚙️ Voice Settings</a>
                     </div>
                 </div>

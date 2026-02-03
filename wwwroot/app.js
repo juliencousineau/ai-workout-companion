@@ -237,7 +237,8 @@ class App {
         });
 
         // Guest sign out button
-        this.elements.guestSignOutBtn.addEventListener('click', () => {
+        this.elements.guestSignOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             this.exitGuestMode();
         });
 
