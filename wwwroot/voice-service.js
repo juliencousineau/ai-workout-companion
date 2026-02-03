@@ -153,11 +153,11 @@ class VoiceService {
                 // macOS Premium voices: Karen, Daniel, Moira, Samantha (Enhanced)
                 // Chrome: Google UK English Female/Male are more natural
                 this.voice =
-                    // macOS enhanced voices
+                    // macOS enhanced voices - Samantha first (user preference)
+                    voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
                     voices.find(v => v.name.includes('Karen') && v.lang.startsWith('en')) ||
                     voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
                     voices.find(v => v.name.includes('Moira') && v.lang.startsWith('en')) ||
-                    voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
                     // Google voices (Chrome)
                     voices.find(v => v.name.includes('Google UK English Female')) ||
                     voices.find(v => v.name.includes('Google UK English Male')) ||
