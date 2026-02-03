@@ -1,7 +1,6 @@
 ---
 name: frontend-design
 description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.
-license: Complete terms in LICENSE.txt
 ---
 
 # Frontend Design Skill
@@ -9,112 +8,88 @@ license: Complete terms in LICENSE.txt
 ## Purpose
 Create visually striking, production-ready frontend code that avoids "AI slop" - generic, templated designs that all look the same. This skill pushes you to make bold, memorable aesthetic choices informed by real design trends.
 
-## Core Principles
+## Modern Editorial Wellness - Complete Spec
 
-### 1. **Commit to a Bold Aesthetic Direction**
-Don't hedge. Don't make "nice" but forgettable interfaces. Examples:
-- **Editorial Wellness** (Aura-style): Stone/Sage palette, generous white space, Newsreader serif + Satoshi sans-serif, NO hover animations
-- **Athletic Brutalist**: Compressed athletic fonts, electric cyan accents, sharp angles
-- **Luxury Minimalist**: High contrast, sophisticated serifs, subtle animations
-- **Neo-Brutalism**: Bold borders, clashing colors, raw typography
+Use this as the reference design system for wellness/health applications:
 
-Pick ONE direction and commit fully.
+### Style
+Light stone background (#FBF9F6) reduces visual fatigue. Muted sage green (#8DA399) for subtle action cues. Typography pairs **Gambetta serif** for headlines with **Satoshi sans-serif** for functional text. Gentle micro-interactions: +4px translate on hover, 300ms ease-in-out transitions.
 
-### 2. **Typography Drives the Aesthetic**
-The font choice is 50% of the design. Avoid the obvious:
-- ❌ **Generic**: Inter, Roboto, default system fonts
-- ✅ **Distinctive**: Newsreader, Satoshi, custom font pairings from Google Fonts or Fontshare
-
-Use **italic accents** for editorial elegance (e.g., "Wellness, *curated.*")
-
-### 3. **Avoid Cliched Color Schemes**
-Especially avoid:
-- Purple gradients (overused in AI/tech)
-- Generic blue (#007bff)
-- Plain black/white without texture
-
-Instead:
-- **Stone/Sage** (#FBF9F6 / #8DA399) for wellness
-- **Electric cyan** (#00E5FF) for athletic energy
-- **Warm terracotta** (#E07A5F) for organic feel
-
-### 4. **Motion Should Be Purposeful (or Absent)**
-- **For editorial/wellness**: **NO hover animations**. Buttons don't lift, cards don't grow. Static is sophisticated.
-- **For energetic brands**: Sharp, snappy micro-interactions
-- Never use generic fade-ins or slow transitions unless specifically justified
-
-### 5. **Spatial Composition**
-- **Generous white space** for editorial (Aura-style)
-- **Overlapping elements** for brutalism
-- **Asymmetric grids** for modern feel
-- **Hero layouts**: 5-column text + 7-column visual (not centered)
-
-## Example: Aura Editorial Wellness Design
-
-```html
-<div class="hero-section">
-    <div class="hero-content">
-        <h1 class="hero-title">
-            Wellness,<br><span class="title-accent">curated.</span>
-        </h1>
-        <p class="hero-description">
-            A deliberate approach to daily consistency. No fillers,
-            no noise—just the essential compounds your body recognizes.
-        </p>
-        <div class="hero-actions">
-            <button class="btn-primary">Shop Regimens</button>
-            <a href="#" class="link-secondary">Browse All Supplements →</a>
-        </div>
-    </div>
-    <div class="hero-visual"></div>
-</div>
+### Color Palette
+```css
+--stone-50: #FBF9F6;   /* Background */
+--stone-200: #EBE5DE;  /* Borders */
+--stone-900: #1C1917;  /* Text */
+--sage-500: #8DA399;   /* Accent */
 ```
 
+### Typography
+- **Headlines**: Gambetta (Serif), weights 400-700
+- **Body/Nav**: Satoshi (Sans-serif), weights 300-700
+
+### Layout
+- **Max width**: 1440px
+- **Section padding**: 48-96px (6-12 units)
+- **Card padding**: 24px
+- **Border radius**: 8px standard
+
+### Shadows
+Very soft sage-tinted shadows on hover:
 ```css
-:root {
-    --stone-50: #FBF9F6;
-    --stone-900: #1C1917;
-    --sage-500: #8DA399;
-    --font-serif: 'Newsreader', serif;
-    --font-sans: 'Satoshi', sans-serif;
-}
+box-shadow: 0 8px 16px rgba(141, 163, 153, 0.2);
+```
 
-.hero-section {
-    display: grid;
-    grid-template-columns: 5fr 7fr;
-    gap: 64px;
-    padding: 64px 32px;
-    min-height: 80vh;
-}
+### Borders
+1px solid with Stone 200 (#EBE5DE) for "barely-there" feel.
 
-.hero-title {
-    font-family: var(--font-serif);
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--stone-900);
-}
+### Micro-interactions
+```css
+transition: all 300ms ease-in-out;
+```
+- Cards translate +4px on Y-axis on hover
+- Buttons have no transform (static sophistication)
+- Images: slow 2000ms scale zoom on lifestyle shots
 
-.title-accent {
-    font-style: italic;
-}
+### Hero Section Pattern
+12-column grid layout:
+- **Left 5 columns**: H1 with italic accent word, description, button group
+- **Right 7 columns**: 4:5 aspect ratio image with 8px radius
 
+### Button Styles
+```css
+/* Primary CTA */
 .btn-primary {
-    padding: 14px 28px;
-    background: var(--stone-900);
-    color: var(--stone-50);
-    border: none;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    /* NO HOVER ANIMATION */
+  background: var(--stone-900);
+  color: var(--stone-50);
+  padding: 16px 32px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  /* NO hover transform */
+}
+```
+
+### Card Pattern
+```css
+.card {
+  background: transparent;
+  border: 1px solid var(--stone-200);
+  border-radius: 8px;
+  padding: 24px;
+  transition: all 300ms ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(141, 163, 153, 0.2);
+  border-color: var(--sage-400);
 }
 ```
 
 ## Implementation Checklist
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-- Production-grade and functional
 - Visually striking and memorable
 - Cohesive with a clear aesthetic point-of-view
 - Meticulously refined in every detail
