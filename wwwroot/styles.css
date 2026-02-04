@@ -1025,7 +1025,10 @@ button,
 #chatScreen.active {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    height: calc(100vh - 80px);
+    /* Fallback for older browsers */
+    height: calc(100vh - 80px - env(safe-area-inset-bottom, 0px));
+    /* Dynamic viewport height for mobile browsers */
+    height: calc(100dvh - 80px - env(safe-area-inset-bottom, 0px));
     flex: none;
 }
 
