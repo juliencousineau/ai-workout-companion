@@ -1000,8 +1000,8 @@ class App {
 
         this.elements.chatMessages.appendChild(messageDiv);
 
-        // Scroll to bottom
-        this.elements.chatMessages.scrollTop = this.elements.chatMessages.scrollHeight;
+        // Scroll to bottom - use scrollIntoView for better mobile support
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
 
     /**
