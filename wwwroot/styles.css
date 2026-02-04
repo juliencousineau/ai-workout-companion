@@ -1018,6 +1018,7 @@ button,
 /* Chat Screen */
 #chatScreen {
     padding: 0;
+    overflow: hidden;
 }
 
 .chat-container {
@@ -1025,6 +1026,8 @@ button,
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .workout-header {
@@ -1097,7 +1100,9 @@ button,
 /* Chat Messages */
 .chat-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: var(--space-md);
     display: flex;
     flex-direction: column;
