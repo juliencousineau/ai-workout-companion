@@ -2,6 +2,8 @@
 
 An AI-powered workout companion that integrates with the Hevy fitness app to guide you through your workouts with voice interaction and real-time feedback.
 
+**🚀 [Try it live](https://ai-workout-companion-production.up.railway.app/)**
+
 ## Screenshots
 
 <p align="center">
