@@ -126,45 +126,51 @@
 
             <!-- Voice Settings Screen -->
             <div id="voiceSettingsScreen" class="screen">
-                <div class="voice-settings-card">
+                <div class="settings-container">
                     <button id="backFromVoiceSettingsBtn" class="btn-back">← Back</button>
-                    <h2 class="voice-settings-title">Voice Settings</h2>
 
-                    <div class="voice-setting-group">
-                        <label class="voice-setting-label">Voice</label>
-                        <select id="voiceSelect" class="voice-select">
-                            <option value="">Loading voices...</option>
-                        </select>
+                    <header class="settings-header">
+                        <h2 class="settings-title">Voice <em>Settings</em></h2>
+                        <p class="settings-subtitle">Customize your workout coach voice</p>
+                    </header>
+
+                    <div class="voice-settings-content">
+                        <div class="voice-setting-group">
+                            <label class="voice-setting-label">Voice</label>
+                            <select id="voiceSelect" class="voice-select">
+                                <option value="">Loading voices...</option>
+                            </select>
+                        </div>
+
+                        <div class="voice-setting-group">
+                            <label class="voice-setting-label">
+                                Pitch
+                                <span class="voice-setting-value" id="pitchValue">1.05</span>
+                            </label>
+                            <input type="range" id="pitchSlider" class="voice-slider" min="0.5" max="2" step="0.05"
+                                value="1.05">
+                        </div>
+
+                        <div class="voice-setting-group">
+                            <label class="voice-setting-label">
+                                Rate
+                                <span class="voice-setting-value" id="rateValue">1.2</span>
+                            </label>
+                            <input type="range" id="rateSlider" class="voice-slider" min="0.5" max="2" step="0.1"
+                                value="1.2">
+                        </div>
+
+                        <div class="voice-setting-group">
+                            <label class="voice-setting-label">
+                                Volume
+                                <span class="voice-setting-value" id="volumeValue">1.0</span>
+                            </label>
+                            <input type="range" id="volumeSlider" class="voice-slider" min="0" max="1" step="0.1"
+                                value="1.0">
+                        </div>
+
+                        <button id="testVoiceBtn" class="btn btn-primary btn-large">Test Voice</button>
                     </div>
-
-                    <div class="voice-setting-group">
-                        <label class="voice-setting-label">
-                            Pitch
-                            <span class="voice-setting-value" id="pitchValue">1.05</span>
-                        </label>
-                        <input type="range" id="pitchSlider" class="voice-slider" min="0.5" max="2" step="0.05"
-                            value="1.05">
-                    </div>
-
-                    <div class="voice-setting-group">
-                        <label class="voice-setting-label">
-                            Rate
-                            <span class="voice-setting-value" id="rateValue">1.2</span>
-                        </label>
-                        <input type="range" id="rateSlider" class="voice-slider" min="0.5" max="2" step="0.1"
-                            value="1.2">
-                    </div>
-
-                    <div class="voice-setting-group">
-                        <label class="voice-setting-label">
-                            Volume
-                            <span class="voice-setting-value" id="volumeValue">1.0</span>
-                        </label>
-                        <input type="range" id="volumeSlider" class="voice-slider" min="0" max="1" step="0.1"
-                            value="1.0">
-                    </div>
-
-                    <button id="testVoiceBtn" class="btn btn-primary btn-large">Test Voice</button>
                 </div>
             </div>
 
@@ -253,9 +259,13 @@
 
             <!-- Workout Complete Screen -->
             <div id="completeScreen" class="screen">
-                <div class="complete-card">
+                <div class="settings-container complete-container">
                     <div class="complete-icon">🎉</div>
-                    <h2>Workout Complete!</h2>
+
+                    <header class="settings-header">
+                        <h2 class="settings-title">Workout <em>Complete!</em></h2>
+                    </header>
+
                     <div id="workoutSummary" class="workout-summary">
                         <!-- Summary will be loaded here -->
                     </div>

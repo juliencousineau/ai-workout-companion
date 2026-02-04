@@ -990,9 +990,9 @@ button,
 }
 
 .routines-list {
-    flex: 1;
     overflow-y: auto;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
+    max-height: 50vh;
 }
 
 .routine-item {
@@ -1253,12 +1253,8 @@ button,
 }
 
 /* Complete Screen */
-.complete-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+.complete-container {
     text-align: center;
-    margin-top: var(--space-2xl);
 }
 
 .complete-icon {
@@ -1278,15 +1274,6 @@ button,
     100% {
         transform: scale(1) rotate(0);
     }
-}
-
-.complete-card h2 {
-    font-size: 1.75rem;
-    margin: var(--space-lg) 0;
-    background: var(--gradient-success);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .workout-summary {
@@ -1425,18 +1412,8 @@ button,
 }
 
 /* Voice Settings Screen */
-.voice-settings-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.voice-settings-title {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-xl);
-    text-align: center;
+.voice-settings-content {
+    margin-top: var(--space-lg);
 }
 
 .voice-setting-group {
