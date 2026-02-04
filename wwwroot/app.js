@@ -87,6 +87,7 @@ class App {
 
         this.isGuestMode = false;
         this.editingFromAppSettings = false;
+        this.previousScreen = null;
 
         this.selectedRoutine = null;
         this.routines = [];
@@ -344,14 +345,14 @@ class App {
         // Voice settings link
         this.elements.voiceSettingsLink.addEventListener('click', (e) => {
             e.preventDefault();
-            this.showScreen('voiceSettings');
+            this.showScreen('voiceSettings', true);
         });
 
         // Header voice settings link
         if (this.elements.voiceSettingsHeaderLink) {
             this.elements.voiceSettingsHeaderLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.showScreen('voiceSettings');
+                this.showScreen('voiceSettings', true);
             });
         }
 
@@ -367,15 +368,7 @@ class App {
         if (this.elements.voiceSettingsFooterLink) {
             this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.showScreen('voiceSettings');
-            });
-        }
-
-        // Footer voice settings link
-        if (this.elements.voiceSettingsFooterLink) {
-            this.elements.voiceSettingsFooterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showScreen('voiceSettings');
+                this.showScreen('voiceSettings', true);
             });
         }
 
@@ -395,13 +388,18 @@ class App {
             });
         }
 
-        // Back from voice settings
+        // Back from voice settings - return to previous screen
         this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => {
-            const provider = providerManager.getActive();
-            if (provider && provider.connected) {
-                this.showScreen('workoutSelect');
+            if (this.previousScreen) {
+                this.showScreen(this.previousScreen);
+                this.previousScreen = null;
             } else {
-                this.showScreen('setup');
+                const provider = providerManager.getActive();
+                if (provider && provider.connected) {
+                    this.showScreen('workoutSelect');
+                } else {
+                    this.showScreen('setup');
+                }
             }
         });
 
@@ -1201,7 +1199,15 @@ class App {
     /**
      * Show a specific screen
      */
-    showScreen(screenName) {
+    showScreen(screenName, trackPrevious = false) {
+        // Track previous screen if requested (for voice settings navigation)
+        if (trackPrevious) {
+            const currentScreen = document.querySelector('.screen.active');
+            if (currentScreen) {
+                this.previousScreen = currentScreen.id.replace('Screen', '');
+            }
+        }
+
         // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
