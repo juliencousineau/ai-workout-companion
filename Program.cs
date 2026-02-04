@@ -16,8 +16,9 @@ builder.WebHost.ConfigureKestrel(options =>
 // Add services
 builder.Services.AddControllers();
 
-// Add database - support Railway's DATABASE_URL or fall back to config
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+// Add database - support Railway's PostgreSQL variables
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL") 
+    ?? Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
 string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
@@ -27,6 +28,17 @@ if (!string.IsNullOrEmpty(databaseUrl))
     var userInfo = uri.UserInfo.Split(':');
     connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
     Console.WriteLine($"Using DATABASE_URL: Host={uri.Host}, Database={uri.AbsolutePath.TrimStart('/')}");
+}
+else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PGHOST")))
+{
+    // Fallback to individual PG* environment variables
+    var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+    var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE") ?? "railway";
+    var pgUser = Environment.GetEnvironmentVariable("PGUSER") ?? Environment.GetEnvironmentVariable("POSTGRES_USER");
+    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD") ?? Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+    connectionString = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode=Require;Trust Server Certificate=true";
+    Console.WriteLine($"Using PG* variables: Host={pgHost}, Database={pgDatabase}");
 }
 else
 {
