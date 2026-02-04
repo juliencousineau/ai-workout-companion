@@ -9,6 +9,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 - **⏱️ Timed Exercise Support** - Automatic countdowns for planks, stretches, and other timed exercises
 - **💬 Chat Interface** - Type or speak to interact with your AI coach
 - **🔊 Voice Announcements** - Customizable voice settings with adjustable pitch, rate, and volume
+- **🗣️ Custom Voice Commands** - Add your own phonetic alternatives for misheard words
 - **📊 Workout Summary** - View your completed workout stats before syncing
 
 ## Tech Stack
@@ -70,6 +71,14 @@ Navigate to Voice settings to customize:
 - Pitch (0.5 - 2.0)
 - Rate (0.5 - 2.0)
 - Volume (0 - 1.0)
+
+### Custom Voice Commands
+
+If your phone mishears certain words, add custom phonetic alternatives:
+- Go to **Voice Settings** > **Custom Voice Commands**
+- Add mappings like "sex" → "6" or "tree" → "3"
+- Click **Reset to Defaults** to restore built-in alternatives
+- All mappings sync across devices when signed in
 
 ### Connected Apps
 
