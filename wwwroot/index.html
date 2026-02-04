@@ -180,6 +180,25 @@
                         </div>
 
                         <button id="testVoiceBtn" class="btn btn-primary btn-large">Test Voice</button>
+
+                        <!-- Custom Phonetics Section -->
+                        <div class="phonetics-section" id="phoneticsSection" style="display: none;">
+                            <h3 class="section-title">Custom Voice Commands</h3>
+                            <p class="section-subtitle">Add alternative words for numbers that your phone mishears</p>
+
+                            <div class="phonetic-add-form">
+                                <input type="text" id="phoneticAlternative" placeholder="Misheard word (e.g., sex)"
+                                    class="phonetic-input">
+                                <span class="phonetic-arrow">→</span>
+                                <input type="text" id="phoneticCanonical" placeholder="Correct value (e.g., 6)"
+                                    class="phonetic-input">
+                                <button id="addPhoneticBtn" class="btn btn-primary btn-small">Add</button>
+                            </div>
+
+                            <div id="phoneticsList" class="phonetics-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -335,6 +354,7 @@
     <script src="providers/hevy-provider.js"></script>
     <script src="voice-service.js"></script>
     <script src="wake-lock-service.js"></script>
+    <script src="phonetics-service.js"></script>
     <script src="workout-engine.js"></script>
     <script src="app.js"></script>
 </body>
