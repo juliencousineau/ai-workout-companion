@@ -1,6 +1,7 @@
 /**
  * Crypto Utilities
  * Save/load encrypted credentials via server API
+ * Supports both authenticated (UserId) and guest (DeviceId) modes
  */
 
 class CryptoUtils {
@@ -35,15 +36,32 @@ class CryptoUtils {
     }
 
     /**
+     * Get auth headers if user is authenticated
+     */
+    getHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+
+        // Add authorization header if user is signed in
+        if (window.authService && window.authService.isAuthenticated()) {
+            const authHeader = window.authService.getAuthHeader();
+            // Merge auth headers (getAuthHeader now returns an object)
+            Object.assign(headers, authHeader);
+        }
+
+        return headers;
+    }
+
+    /**
      * Save API key to server (encrypted server-side)
+     * Uses UserId if authenticated, DeviceId if guest
      */
     async saveCredentials(provider, apiKey) {
         try {
             const response = await fetch('/api/credentials/save', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify({
-                    deviceId: this.getDeviceId(),
+                    deviceId: this.getDeviceId(), // Send DeviceId for fallback
                     provider,
                     apiKey
                 })
@@ -53,7 +71,9 @@ class CryptoUtils {
                 throw new Error('Failed to save credentials');
             }
 
-            return await response.json();
+            const result = await response.json();
+            console.log('Credentials saved:', result.userLinked ? 'user-linked' : 'device-linked');
+            return result;
         } catch (error) {
             console.error('Save credentials error:', error);
             // Fallback to localStorage
@@ -64,14 +84,15 @@ class CryptoUtils {
 
     /**
      * Load API key from server
+     * Prioritizes UserId if authenticated, falls back to DeviceId
      */
     async loadCredentials(provider) {
         try {
             const response = await fetch('/api/credentials/load', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify({
-                    deviceId: this.getDeviceId(),
+                    deviceId: this.getDeviceId(), // Send DeviceId for fallback
                     provider
                 })
             });
@@ -81,6 +102,9 @@ class CryptoUtils {
             }
 
             const result = await response.json();
+            if (result.found) {
+                console.log('Credentials loaded:', result.userLinked ? 'user-linked' : 'device-linked');
+            }
             return result.found ? result.apiKey : null;
         } catch (error) {
             console.error('Load credentials error:', error);
@@ -96,9 +120,9 @@ class CryptoUtils {
         try {
             const response = await fetch('/api/credentials/delete', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify({
-                    deviceId: this.getDeviceId(),
+                    deviceId: this.getDeviceId(), // Send DeviceId for fallback
                     provider
                 })
             });

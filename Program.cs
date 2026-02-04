@@ -6,6 +6,13 @@ using AiWorkoutCompanion.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel to accept larger headers (for JWT auth tokens)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestHeadersTotalSize = 131072; // 128KB
+    options.Limits.MaxRequestHeaderCount = 100;
+});
+
 // Add services
 builder.Services.AddControllers();
 

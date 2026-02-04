@@ -124,7 +124,7 @@ class AuthService {
     }
 
     /**
-     * Get authorization header
+     * Get authorization header as an object for spreading into fetch headers
      */
     getAuthHeader() {
         return this.token ? { 'Authorization': `Bearer ${this.token}` } : {};
@@ -133,3 +133,4 @@ class AuthService {
 
 // Export singleton instance
 const authService = new AuthService();
+window.authService = authService; // Make accessible to other scripts

@@ -8,6 +8,7 @@ class App {
             welcome: document.getElementById('welcomeScreen'),
             setup: document.getElementById('setupScreen'),
             voiceSettings: document.getElementById('voiceSettingsScreen'),
+            appSettings: document.getElementById('appSettingsScreen'),
             workoutSelect: document.getElementById('workoutSelectScreen'),
             chat: document.getElementById('chatScreen'),
             complete: document.getElementById('completeScreen')
@@ -66,10 +67,18 @@ class App {
             userNameFooter: document.getElementById('userNameFooter'),
             guestInfoFooter: document.getElementById('guestInfoFooter'),
             guestSignOutFooterBtn: document.getElementById('guestSignOutFooterBtn'),
-            userSignOutFooterBtn: document.getElementById('userSignOutFooterBtn')
+            userSignOutFooterBtn: document.getElementById('userSignOutFooterBtn'),
+
+            // App Settings elements
+            appSettingsFooterLink: document.getElementById('appSettingsFooterLink'),
+            backFromAppSettingsBtn: document.getElementById('backFromAppSettingsBtn'),
+            connectedProvidersList: document.getElementById('connectedProvidersList'),
+            noProvidersMessage: document.getElementById('noProvidersMessage'),
+            connectNewProviderBtn: document.getElementById('connectNewProviderBtn')
         };
 
         this.isGuestMode = false;
+        this.editingFromAppSettings = false;
 
         this.selectedRoutine = null;
         this.routines = [];
@@ -88,8 +97,10 @@ class App {
         // Initialize Google Auth
         await this.initAuth();
 
-        // Load user settings (voice preferences)
+        // Load user settings (voice preferences) from server
         await userSettingsService.loadSettings();
+        // Reload voice service with synced settings
+        voiceService.reloadSettings();
         this.loadVoiceSettings();
         this.populateVoiceSelector();
 
@@ -161,7 +172,7 @@ class App {
      */
     enterGuestMode() {
         this.isGuestMode = true;
-        localStorage.setItem('isGuestMode', 'true');
+        localStorage.setItem('guest_mode', 'true');
         this.elements.guestView.style.display = 'flex';
         this.elements.guestViewHeader.style.display = 'flex';
         // Update footer
@@ -179,7 +190,7 @@ class App {
      */
     exitGuestMode() {
         this.isGuestMode = false;
-        localStorage.removeItem('isGuestMode');
+        localStorage.removeItem('guest_mode');
         this.elements.guestView.style.display = 'none';
         this.elements.guestViewHeader.style.display = 'none';
         // Update footer
@@ -192,13 +203,24 @@ class App {
     /**
      * Handle user sign in
      */
-    handleSignIn(user) {
+    async handleSignIn(user) {
         this.showUserProfile(user);
         // Reload settings from server
-        userSettingsService.loadSettings().then(() => {
-            this.loadVoiceSettings();
-        });
-        // Navigate to setup screen
+        await userSettingsService.loadSettings();
+        this.loadVoiceSettings();
+
+        // Reload saved credentials (now user-linked)
+        const hasCredentials = await providerManager.loadSavedProvider();
+        if (hasCredentials) {
+            this.elements.apiKeyInput.value = '••••••••••••••••';
+            const connected = await this.testConnection();
+            if (connected) {
+                // testConnection already navigates to workout selection via onConnected()
+                return;
+            }
+        }
+
+        // Only show setup screen if not already connected
         this.showScreen('setup');
     }
 
@@ -209,17 +231,8 @@ class App {
         // Call authService to clear token and user data
         authService.signOut();
 
-        // Update UI
-        this.elements.signedInView.style.display = 'none';
-        this.elements.signedOutView.style.display = 'block';
-
-        // Update footer
-        if (this.elements.userInfoFooter) {
-            this.elements.userInfoFooter.style.display = 'none';
-        }
-
-        // Return to welcome screen
-        this.showScreen('welcome');
+        // Refresh page to properly reset Google Sign-In button
+        location.reload();
     }
 
     /**
@@ -229,15 +242,17 @@ class App {
         this.elements.signedOutView.style.display = 'none';
         this.elements.signedInView.style.display = 'flex';
         this.elements.userName.textContent = user.name;
-        if (user.profilePictureUrl) {
-            this.elements.userProfilePic.src = user.profilePictureUrl;
+        // Support both profilePictureUrl and picture (Google auth uses 'picture')
+        const profilePic = user.profilePictureUrl || user.picture;
+        if (profilePic) {
+            this.elements.userProfilePic.src = profilePic;
         }
         // Update footer
         if (this.elements.userInfoFooter) {
             this.elements.userInfoFooter.style.display = 'flex';
             this.elements.userNameFooter.textContent = user.name;
-            if (user.profilePictureUrl) {
-                this.elements.userProfilePicFooter.src = user.profilePictureUrl;
+            if (profilePic) {
+                this.elements.userProfilePicFooter.src = profilePic;
             }
         }
         if (this.elements.guestInfoFooter) {
@@ -284,7 +299,14 @@ class App {
         });
 
         // Back to providers button
-        this.elements.backToProvidersBtn.addEventListener('click', () => this.showProviderSelect());
+        this.elements.backToProvidersBtn.addEventListener('click', () => {
+            if (this.editingFromAppSettings) {
+                this.editingFromAppSettings = false;
+                this.showAppSettings();
+            } else {
+                this.showProviderSelect();
+            }
+        });
 
         // Sign out button
         this.elements.signOutBtn.addEventListener('click', () => {
@@ -358,7 +380,14 @@ class App {
         }
 
         // Back from voice settings
-        this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => this.showScreen('setup'));
+        this.elements.backFromVoiceSettingsBtn.addEventListener('click', () => {
+            const provider = providerManager.getActive();
+            if (provider && provider.connected) {
+                this.showScreen('workoutSelect');
+            } else {
+                this.showScreen('setup');
+            }
+        });
 
         // Voice selector
         this.elements.voiceSelect.addEventListener('change', (e) => this.handleVoiceChange(e.target.value));
@@ -368,7 +397,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.pitchValue.textContent = value.toFixed(2);
             voiceService.pitch = value;
-            userSettingsService.set('tts_pitch', value);
+            userSettingsService.set('tts_pitch', value.toString());
         });
 
         // Rate slider
@@ -376,7 +405,7 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.rateValue.textContent = value.toFixed(1);
             voiceService.rate = value;
-            userSettingsService.set('tts_rate', value);
+            userSettingsService.set('tts_rate', value.toString());
         });
 
         // Volume slider
@@ -384,13 +413,41 @@ class App {
             const value = parseFloat(e.target.value);
             this.elements.volumeValue.textContent = value.toFixed(1);
             voiceService.volume = value;
-            userSettingsService.set('tts_volume', value);
+            userSettingsService.set('tts_volume', value.toString());
         });
 
         // Test voice button
         this.elements.testVoiceBtn.addEventListener('click', () => {
             voiceService.speak('This is a test of your voice settings. How does it sound?');
         });
+
+        // App Settings footer link
+        if (this.elements.appSettingsFooterLink) {
+            this.elements.appSettingsFooterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showAppSettings();
+            });
+        }
+
+        // Back from App Settings
+        if (this.elements.backFromAppSettingsBtn) {
+            this.elements.backFromAppSettingsBtn.addEventListener('click', () => {
+                // Go back to workout select if connected, otherwise setup
+                const provider = providerManager.getActive();
+                if (provider && provider.connected) {
+                    this.showScreen('workoutSelect');
+                } else {
+                    this.showScreen('setup');
+                }
+            });
+        }
+
+        // Connect new provider button
+        if (this.elements.connectNewProviderBtn) {
+            this.elements.connectNewProviderBtn.addEventListener('click', () => {
+                this.showScreen('setup');
+            });
+        }
     }
 
     /**
@@ -407,7 +464,8 @@ class App {
         };
 
         workoutEngine.onWorkoutComplete = async (workoutData) => {
-            await this.saveWorkout(workoutData);
+            // Note: Workout is already synced to Hevy by the workout engine's syncToHevy()
+            // No need to call saveWorkout here - it would create a duplicate
             this.showWorkoutComplete();
         };
     }
@@ -674,6 +732,127 @@ class App {
     }
 
     /**
+     * Show App Settings screen with connected providers
+     */
+    showAppSettings() {
+        this.showScreen('appSettings');
+        this.renderConnectedProviders();
+    }
+
+    /**
+     * Render the list of connected providers
+     */
+    renderConnectedProviders() {
+        const providerNames = providerManager.getProviderNames();
+        const connectedProviders = [];
+
+        // Check which providers are connected
+        for (const name of providerNames) {
+            const provider = providerManager.providers[name];
+            if (provider && provider.connected) {
+                connectedProviders.push({
+                    name: name,
+                    displayName: name.charAt(0).toUpperCase() + name.slice(1),
+                    icon: name === 'hevy' ? '🟠' : '🔵'
+                });
+            }
+        }
+
+        if (connectedProviders.length === 0) {
+            this.elements.connectedProvidersList.innerHTML = '';
+            this.elements.noProvidersMessage.style.display = 'block';
+        } else {
+            this.elements.noProvidersMessage.style.display = 'none';
+            this.elements.connectedProvidersList.innerHTML = connectedProviders.map(p => `
+                <div class="provider-card-item" data-provider="${p.name}">
+                    <div class="provider-card-icon">${p.icon}</div>
+                    <div class="provider-card-content">
+                        <div class="provider-card-name">${p.displayName}</div>
+                        <div class="provider-card-status">Connected</div>
+                    </div>
+                    <div class="provider-card-actions">
+                        <button type="button" class="btn-action" onclick="event.stopPropagation(); app.editProvider('${p.name}')">Edit</button>
+                        <button type="button" class="btn-action btn-danger" onclick="event.stopPropagation(); app.disconnectProvider('${p.name}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    /**
+     * Edit a provider's API key
+     */
+    editProvider(providerName) {
+        // Track that we came from App Settings
+        this.editingFromAppSettings = true;
+        // Navigate directly to connection form
+        providerManager.setActive(providerName);
+        this.showScreen('setup');
+        // Show connection form directly (not provider list)
+        this.elements.providerSelectView.style.display = 'none';
+        this.elements.connectionFormView.style.display = 'flex';
+        // Clear the input so user can enter new key
+        this.elements.apiKeyInput.value = '';
+        // Reset button state
+        this.elements.connectBtn.textContent = 'Connect';
+        this.elements.connectBtn.disabled = false;
+        this.elements.apiKeyInput.focus();
+    }
+
+    /**
+     * Disconnect a provider - show inline confirmation
+     */
+    disconnectProvider(providerName) {
+        // Find the provider card and show inline confirmation
+        const card = document.querySelector(`.provider-card-item[data-provider="${providerName}"]`);
+        if (!card) return;
+
+        const actionsDiv = card.querySelector('.provider-card-actions');
+        const originalContent = actionsDiv.innerHTML;
+
+        // Replace with confirmation UI - stacked layout
+        actionsDiv.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                <span style="font-family: var(--font-serif); font-size: 0.875rem; color: var(--stone-900);">Remove this app?</span>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-action" onclick="event.stopPropagation(); app.cancelDisconnect('${providerName}')">Cancel</button>
+                    <button type="button" class="btn-action btn-danger" onclick="event.stopPropagation(); app.confirmDisconnect('${providerName}')">Remove</button>
+                </div>
+            </div>
+        `;
+
+        // Store original content for cancel
+        card.dataset.originalActions = originalContent;
+    }
+
+    /**
+     * Confirm disconnect - actually remove the provider
+     */
+    async confirmDisconnect(providerName) {
+        const provider = providerManager.providers[providerName];
+        if (provider) {
+            provider.disconnect();
+        }
+
+        // Re-render the list
+        this.renderConnectedProviders();
+    }
+
+    /**
+     * Cancel disconnect - restore original buttons
+     */
+    cancelDisconnect(providerName) {
+        const card = document.querySelector(`.provider-card-item[data-provider="${providerName}"]`);
+        if (!card) return;
+
+        const actionsDiv = card.querySelector('.provider-card-actions');
+        if (card.dataset.originalActions) {
+            actionsDiv.innerHTML = card.dataset.originalActions;
+            delete card.dataset.originalActions;
+        }
+    }
+
+    /**
      * Load routines from provider
      */
     async loadRoutines() {
@@ -826,12 +1005,28 @@ class App {
     }
 
     /**
-     * Confirm ending workout
+     * Show inline confirmation for ending workout
      */
     confirmEndWorkout() {
-        if (confirm('Are you sure you want to end this workout?')) {
+        const endBtn = document.getElementById('endWorkoutBtn');
+        const confirmUI = document.getElementById('endWorkoutConfirm');
+
+        // Hide the end button, show confirmation
+        endBtn.style.display = 'none';
+        confirmUI.style.display = 'flex';
+
+        // Set up cancel handler
+        document.getElementById('endWorkoutCancel').onclick = () => {
+            confirmUI.style.display = 'none';
+            endBtn.style.display = 'inline-flex';
+        };
+
+        // Set up confirm handler
+        document.getElementById('endWorkoutConfirmBtn').onclick = () => {
+            confirmUI.style.display = 'none';
+            endBtn.style.display = 'inline-flex';
             workoutEngine.completeWorkout();
-        }
+        };
     }
 
     /**

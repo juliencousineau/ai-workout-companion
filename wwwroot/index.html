@@ -172,6 +172,29 @@
                 </div>
             </div>
 
+            <!-- App Settings Screen -->
+            <div id="appSettingsScreen" class="screen">
+                <div class="settings-container">
+                    <button id="backFromAppSettingsBtn" class="btn-back">← Back</button>
+
+                    <header class="settings-header">
+                        <h2 class="settings-title">Connected <em>Apps</em></h2>
+                        <p class="settings-subtitle">Manage your workout app integrations</p>
+                    </header>
+
+                    <div id="connectedProvidersList" class="providers-grid">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <div id="noProvidersMessage" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">📱</div>
+                        <h3>No apps connected</h3>
+                        <p>Connect a workout app to sync your routines and track your progress.</p>
+                        <button id="connectNewProviderBtn" class="btn btn-primary">Connect an App</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Workout Selection Screen -->
             <div id="workoutSelectScreen" class="screen">
                 <div class="workout-select-card">
@@ -194,7 +217,14 @@
                             <h3 id="workoutTitle">Push Day</h3>
                             <span id="exerciseProgress">Exercise 1/5</span>
                         </div>
-                        <button id="endWorkoutBtn" class="btn btn-danger btn-small">End Workout</button>
+                        <div class="end-workout-actions" id="endWorkoutActions">
+                            <button id="endWorkoutBtn" class="btn btn-danger btn-small">End Workout</button>
+                            <div id="endWorkoutConfirm" class="inline-confirm" style="display: none;">
+                                <span class="confirm-text">End workout?</span>
+                                <button id="endWorkoutCancel" class="btn-action btn-action-secondary">Cancel</button>
+                                <button id="endWorkoutConfirmBtn" class="btn-action btn-action-danger">End</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Chat Messages -->
@@ -269,8 +299,14 @@
 
                     <!-- Voice Settings Link -->
                     <a href="#" id="voiceSettingsFooterLink" class="footer-link">
+                        <span class="footer-link-icon">🎤</span>
+                        <span class="footer-link-text">Voice</span>
+                    </a>
+
+                    <!-- App Settings Link -->
+                    <a href="#" id="appSettingsFooterLink" class="footer-link">
                         <span class="footer-link-icon">⚙️</span>
-                        <span class="footer-link-text">Voice Settings</span>
+                        <span class="footer-link-text">Apps</span>
                     </a>
                 </div>
             </div>

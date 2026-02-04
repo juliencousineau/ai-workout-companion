@@ -91,10 +91,17 @@ class HevyProvider extends WorkoutProvider {
             });
 
             if (!response.ok) {
+                // Log the error response body for debugging
+                let errorBody = '';
+                try {
+                    errorBody = await response.text();
+                    console.error('Hevy API Error Response:', errorBody);
+                } catch (e) { }
+
                 if (response.status === 401) {
                     throw new Error('Invalid API key');
                 }
-                throw new Error(`API error: ${response.status}`);
+                throw new Error(`API error: ${response.status} - ${errorBody}`);
             }
 
             return await response.json();

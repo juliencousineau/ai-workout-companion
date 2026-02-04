@@ -17,6 +17,8 @@ class WorkoutEngine {
         this.timerSeconds = 0;
         this.restTimerInterval = null;
         this.lastAIMessage = null;
+        this.activeWorkoutId = null; // For real-time Hevy sync
+        this.isCreatingWorkout = false; // Guard against duplicate creation
 
         // Callback for sending messages
         this.onMessage = null;
@@ -86,17 +88,20 @@ class WorkoutEngine {
     /**
      * Start a workout with the given routine
      */
-    startWorkout(routine) {
+    async startWorkout(routine) {
         this.routine = routine;
         this.currentExerciseIndex = 0;
         this.currentSetIndex = 0;
         this.currentRep = 0;
         this.workoutStartTime = new Date();
+        this.activeWorkoutId = null;
 
         // Initialize workout data structure
         this.workoutData = {
             title: routine.title || routine.name || 'Workout',
             start_time: this.workoutStartTime.toISOString(),
+            end_time: this.workoutStartTime.toISOString(),
+            is_private: false,
             exercises: []
         };
 
@@ -104,9 +109,84 @@ class WorkoutEngine {
         const exercise = this.getCurrentExercise();
         this.sendAIMessage(`Starting "${this.workoutData.title}" workout!`);
 
+        // Note: Workout will be created in Hevy when first set is logged
+        // (Hevy requires at least 1 exercise)
+
         setTimeout(() => {
             this.announceExercise(exercise);
         }, 500);
+    }
+
+    /**
+     * Create workout in Hevy for real-time sync
+     * Note: isCreatingWorkout flag is set by caller (syncToHevy)
+     */
+    async createWorkoutInHevy() {
+        try {
+            const provider = providerManager.getActive();
+            if (provider && provider.connected) {
+                const response = await provider.createWorkout(this.workoutData);
+                console.log('Hevy API response:', response);
+
+                // Hevy API returns workout as an array, not an object
+                // Handle both array and object response formats
+                let workoutId = null;
+                if (response?.workout) {
+                    if (Array.isArray(response.workout) && response.workout.length > 0) {
+                        workoutId = response.workout[0].id;
+                    } else if (response.workout.id) {
+                        workoutId = response.workout.id;
+                    }
+                }
+
+                if (workoutId) {
+                    this.activeWorkoutId = workoutId;
+                    console.log('Workout created in Hevy:', this.activeWorkoutId);
+                } else {
+                    console.error('Failed to get workout ID from Hevy response:', response);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to create workout in Hevy:', error);
+            // Continue workout locally even if Hevy fails
+        } finally {
+            this.isCreatingWorkout = false;
+        }
+    }
+
+    /**
+     * Update workout in Hevy with current data
+     * Creates the workout if it doesn't exist yet
+     */
+    async syncToHevy() {
+        console.log('syncToHevy called - activeWorkoutId:', this.activeWorkoutId, 'isCreatingWorkout:', this.isCreatingWorkout);
+
+        // If no workout created yet and we have exercises, create it
+        if (!this.activeWorkoutId && this.workoutData.exercises.length > 0) {
+            // Guard against duplicate creation from race conditions
+            // Set flag SYNCHRONOUSLY before any await to prevent parallel calls
+            if (this.isCreatingWorkout) {
+                console.log('Workout creation already in progress, skipping...');
+                return;
+            }
+            this.isCreatingWorkout = true; // Set immediately before await
+            await this.createWorkoutInHevy();
+            return; // createWorkoutInHevy already contains the latest data
+        }
+
+        if (!this.activeWorkoutId) {
+            return;
+        }
+
+        try {
+            const provider = providerManager.getActive();
+            if (provider && provider.connected) {
+                await provider.updateWorkout(this.activeWorkoutId, this.workoutData);
+                console.log('Workout synced to Hevy');
+            }
+        } catch (error) {
+            console.error('Failed to sync workout to Hevy:', error);
+        }
     }
 
     /**
@@ -131,7 +211,7 @@ class WorkoutEngine {
     announceExercise(exercise) {
         if (!exercise) return;
 
-        const sets = exercise.sets?.length || 3;
+        const sets = exercise.sets?.length;
 
         // Check if duration is specified in the first set (from API)
         const firstSetDuration = exercise.sets?.[0]?.duration_seconds || 0;
@@ -142,7 +222,7 @@ class WorkoutEngine {
         let message = `Next exercise: **${exercise.title || exercise.exercise_template_id}**`;
 
         if (isTimedExercise) {
-            const duration = exercise.duration_seconds || firstSetDuration || 30;
+            const duration = exercise.duration_seconds || firstSetDuration;
             message += ` (${sets} sets × ${duration} seconds).\n`;
             message += `Ready for Set 1? Say 'yes', 'go', or 'start the set'!`;
             this.isCountdown = true;
@@ -335,14 +415,16 @@ class WorkoutEngine {
             this.currentRep = 0;
 
             const exercise = this.getCurrentExercise();
-            const totalSets = exercise?.sets?.length || 3;
+            const totalSets = exercise?.sets?.length;
 
             if (this.currentSetIndex >= totalSets) {
                 messages.push(this.getMotivation('exerciseComplete'));
-                this.moveToNextExercise();
+                this.sendAIMessage(messages.join('\n'));
+                this.startRestTimerForNextExercise(exercise);
+                return; // Exit early, rest timer will handle the transition
             } else {
                 // Start rest timer if rest_seconds is defined
-                const restSeconds = exercise.rest_seconds || 60;
+                const restSeconds = exercise.rest_seconds;
                 messages.push(`Rest for ${restSeconds} seconds...`);
                 this.sendAIMessage(messages.join('\n'));
                 this.startRestTimer(restSeconds, this.currentSetIndex + 1);
@@ -365,20 +447,20 @@ class WorkoutEngine {
             this.logSet();
         }
 
-        const totalSets = exercise?.sets?.length || 3;
+        const totalSets = exercise?.sets?.length;
 
         if (this.currentSetIndex < totalSets - 1) {
             // Done with current set, not all sets
             this.currentSetIndex++;
             this.currentRep = 0;
             const exercise = this.getCurrentExercise();
-            const restSeconds = exercise.rest_seconds || 60;
+            const restSeconds = exercise.rest_seconds;
             this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
             this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         } else {
-            // Done with exercise
+            // Done with exercise - start rest before next exercise
             this.sendAIMessage(this.getMotivation('exerciseComplete'));
-            this.moveToNextExercise();
+            this.startRestTimerForNextExercise(exercise);
         }
     }
 
@@ -403,6 +485,37 @@ class WorkoutEngine {
                 clearInterval(this.restTimerInterval);
                 this.restTimerInterval = null;
                 this.sendAIMessage(`Rest over! Ready for Set ${nextSetNumber}? Say 'yes' or 'go'!`);
+            }
+        }, 1000);
+    }
+
+    /**
+     * Start rest timer before transitioning to next exercise
+     * Uses the rest_seconds from Hevy routine data
+     */
+    startRestTimerForNextExercise(completedExercise) {
+        // Get rest time from Hevy routine data
+        const restSeconds = completedExercise.rest_seconds;
+
+        let remaining = restSeconds;
+
+        this.sendAIMessage(`Rest for ${restSeconds} seconds before the next exercise...`);
+
+        // Clear any existing rest timer
+        if (this.restTimerInterval) {
+            clearInterval(this.restTimerInterval);
+        }
+
+        this.restTimerInterval = setInterval(() => {
+            remaining--;
+
+            // Announce every 10 seconds
+            if (remaining > 0 && remaining % 10 === 0) {
+                this.sendAIMessage(`${remaining} seconds...`);
+            } else if (remaining === 0) {
+                clearInterval(this.restTimerInterval);
+                this.restTimerInterval = null;
+                this.moveToNextExercise();
             }
         }, 1000);
     }
@@ -438,14 +551,14 @@ class WorkoutEngine {
         this.currentSetIndex++;
 
         const exercise = this.getCurrentExercise();
-        const totalSets = exercise?.sets?.length || 3;
+        const totalSets = exercise?.sets?.length;
 
         if (this.currentSetIndex >= totalSets) {
             this.sendAIMessage(`${this.getMotivation('setComplete')}\n${this.getMotivation('exerciseComplete')}`);
-            this.moveToNextExercise();
+            this.startRestTimerForNextExercise(exercise);
         } else {
             // Start rest timer between sets
-            const restSeconds = exercise?.rest_seconds || exercise?.sets?.[this.currentSetIndex]?.rest_seconds || 60;
+            const restSeconds = exercise.rest_seconds;
             this.sendAIMessage(`${this.getMotivation('setComplete')}\nRest for ${restSeconds} seconds...`);
             this.startRestTimer(restSeconds, this.currentSetIndex + 1);
         }
@@ -466,22 +579,23 @@ class WorkoutEngine {
         if (!exerciseData) {
             exerciseData = {
                 exercise_template_id: exercise.exercise_template_id,
-                notes: '',
                 sets: []
             };
             this.workoutData.exercises.push(exerciseData);
         }
 
-        // Add set data
+        // Add set data (without index - Hevy API doesn't accept it)
         exerciseData.sets.push({
-            index: exerciseData.sets.length,
-            set_type: 'normal',
+            type: 'normal',
             weight_kg: exercise.weight_kg || 0,
             reps: this.currentRep || 0,
-            duration_seconds: this.isCountdown ? this.timerSeconds : 0,
-            distance_meters: 0,
+            duration_seconds: this.isCountdown ? this.timerSeconds : null,
+            distance_meters: null,
             rpe: null
         });
+
+        // Sync to Hevy after each set
+        this.syncToHevy();
     }
 
     /**
@@ -513,12 +627,32 @@ class WorkoutEngine {
     /**
      * Complete the workout
      */
-    completeWorkout() {
+    async completeWorkout() {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        if (this.restTimerInterval) {
+            clearInterval(this.restTimerInterval);
+            this.restTimerInterval = null;
         }
 
         this.workoutData.end_time = new Date().toISOString();
+
+        // Wait for any in-progress workout creation before final sync
+        // This prevents duplicate creation if user ends workout quickly after first set
+        if (this.isCreatingWorkout) {
+            console.log('Waiting for workout creation to complete before final sync...');
+            // Poll until creation is complete (max 5 seconds)
+            let attempts = 0;
+            while (this.isCreatingWorkout && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+        }
+
+        // Final sync to Hevy with end time
+        await this.syncToHevy();
 
         const duration = Math.round((new Date() - this.workoutStartTime) / 1000 / 60);
         const totalSets = this.workoutData.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
@@ -533,6 +667,9 @@ class WorkoutEngine {
         if (this.onWorkoutComplete) {
             this.onWorkoutComplete(this.workoutData);
         }
+
+        // Clear active workout ID
+        this.activeWorkoutId = null;
     }
 
     /**

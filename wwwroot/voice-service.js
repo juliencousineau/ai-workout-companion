@@ -23,10 +23,16 @@ class VoiceService {
         this.voice = null;
         this.loadVoices();
 
-        // Voice settings - load from localStorage or use defaults
-        this.pitch = parseFloat(localStorage.getItem('tts_pitch')) || 1.05;
-        this.rate = parseFloat(localStorage.getItem('tts_rate')) || 1.2;
-        this.volume = parseFloat(localStorage.getItem('tts_volume')) || 1.0;
+        // Voice settings - load from userSettingsService (synced) or use defaults
+        if (typeof userSettingsService !== 'undefined') {
+            this.pitch = parseFloat(userSettingsService.get('tts_pitch', '1.05'));
+            this.rate = parseFloat(userSettingsService.get('tts_rate', '1.2'));
+            this.volume = parseFloat(userSettingsService.get('tts_volume', '1.0'));
+        } else {
+            this.pitch = parseFloat(localStorage.getItem('tts_pitch')) || 1.05;
+            this.rate = parseFloat(localStorage.getItem('tts_rate')) || 1.2;
+            this.volume = parseFloat(localStorage.getItem('tts_volume')) || 1.0;
+        }
 
         // State
         this.isListening = false;
@@ -38,6 +44,19 @@ class VoiceService {
         this.onResult = null;
         this.onListeningChange = null;
         this.onError = null;
+    }
+
+    /**
+     * Reload settings from userSettingsService (call after loadSettings completes)
+     */
+    reloadSettings() {
+        if (typeof userSettingsService !== 'undefined') {
+            this.pitch = parseFloat(userSettingsService.get('tts_pitch', '1.05'));
+            this.rate = parseFloat(userSettingsService.get('tts_rate', '1.2'));
+            this.volume = parseFloat(userSettingsService.get('tts_volume', '1.0'));
+            // Reload voice selection
+            this.loadVoices();
+        }
     }
 
     /**
@@ -146,8 +165,13 @@ class VoiceService {
             const voices = this.synthesis.getVoices();
             console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
 
-            // Check if user has saved preference
-            const savedVoiceName = localStorage.getItem('tts_voice');
+            // Check if user has saved preference (use userSettingsService for sync)
+            let savedVoiceName;
+            if (typeof userSettingsService !== 'undefined') {
+                savedVoiceName = userSettingsService.get('tts_voice');
+            } else {
+                savedVoiceName = localStorage.getItem('tts_voice');
+            }
             if (savedVoiceName) {
                 this.voice = voices.find(v => v.name === savedVoiceName);
             }
@@ -199,7 +223,12 @@ class VoiceService {
         const selectedVoice = voices.find(v => v.name === voiceName);
         if (selectedVoice) {
             this.voice = selectedVoice;
-            localStorage.setItem('tts_voice', voiceName);
+            // Use userSettingsService to sync across devices
+            if (typeof userSettingsService !== 'undefined') {
+                userSettingsService.set('tts_voice', voiceName);
+            } else {
+                localStorage.setItem('tts_voice', voiceName);
+            }
             console.log('Voice changed to:', voiceName);
         }
     }
@@ -438,7 +467,12 @@ class VoiceService {
         const selectedVoice = voices.find(v => v.name === voiceName);
         if (selectedVoice) {
             this.voice = selectedVoice;
-            localStorage.setItem('tts_voice', voiceName);
+            // Use userSettingsService to sync across devices
+            if (typeof userSettingsService !== 'undefined') {
+                userSettingsService.set('tts_voice', voiceName);
+            } else {
+                localStorage.setItem('tts_voice', voiceName);
+            }
             console.log('Voice changed to:', voiceName);
         }
     }

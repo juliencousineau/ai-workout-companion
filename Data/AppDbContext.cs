@@ -41,14 +41,30 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // UserCredential entity (keep existing for now)
+        // UserCredential entity - supports both DeviceId (guest) and UserId (authenticated)
         modelBuilder.Entity<UserCredential>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.DeviceId).IsUnique();
+            
+            // Composite unique index for UserId + Provider (authenticated users)
+            entity.HasIndex(e => new { e.UserId, e.Provider })
+                .IsUnique()
+                .HasFilter("\"UserId\" IS NOT NULL");
+            
+            // Composite unique index for DeviceId + Provider (guest users)
+            entity.HasIndex(e => new { e.DeviceId, e.Provider })
+                .IsUnique()
+                .HasFilter("\"DeviceId\" IS NOT NULL");
+            
             entity.Property(e => e.EncryptedApiKey).IsRequired();
             entity.Property(e => e.Provider).IsRequired().HasMaxLength(50);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            
+            // Foreign key relationship to Users
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
@@ -56,9 +72,13 @@ public class AppDbContext : DbContext
 public class UserCredential
 {
     public int Id { get; set; }
-    public string DeviceId { get; set; } = string.Empty;
+    public int? UserId { get; set; }  // Nullable - for authenticated users
+    public string? DeviceId { get; set; }  // Nullable - for guest users
     public string Provider { get; set; } = "hevy";
     public string EncryptedApiKey { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? LastUsedAt { get; set; }
+    
+    // Navigation property
+    public User? User { get; set; }
 }
