@@ -1184,6 +1184,7 @@ button,
     padding: var(--space-md);
     background: var(--bg-card);
     border-top: 1px solid rgba(28, 25, 23, 0.05);
+    flex-shrink: 0;
 }
 
 .chat-input {
