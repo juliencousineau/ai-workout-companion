@@ -13,21 +13,6 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestHeaderCount = 100;
 });
 
-// Configure URLs based on environment
-var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrEmpty(port))
-{
-    // Railway: Use PORT env var, HTTP only (Railway handles SSL at the edge)
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-    Console.WriteLine($"Running on Railway, listening on port {port}");
-}
-else
-{
-    // Local dev: Use HTTP and HTTPS
-    builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:5001");
-    Console.WriteLine("Running locally on ports 5000 (HTTP) and 5001 (HTTPS)");
-}
-
 // Add services
 builder.Services.AddControllers();
 
