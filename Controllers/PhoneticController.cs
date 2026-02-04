@@ -177,6 +177,30 @@ public class PhoneticController : ControllerBase
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// Reset all phonetics to defaults
+    /// </summary>
+    [HttpPost("reset")]
+    public async Task<IActionResult> ResetToDefaults()
+    {
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        // Delete all existing phonetics for this user
+        var existing = await _db.PhoneticMappings
+            .Where(p => p.UserId == userId.Value)
+            .ToListAsync();
+        _db.PhoneticMappings.RemoveRange(existing);
+        await _db.SaveChangesAsync();
+
+        // Reseed defaults
+        await SeedDefaultPhonetics(userId.Value);
+
+        _logger.LogInformation("Reset phonetics to defaults for user {UserId}", userId);
+        return Ok(new { success = true });
+    }
+
     private int? GetUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

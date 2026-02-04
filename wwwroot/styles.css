@@ -1587,6 +1587,11 @@ button,
     font-style: italic;
 }
 
+.reset-btn {
+    margin-top: var(--space-md);
+    width: 100%;
+}
+
 /* App Settings Screen - Editorial Wellness */
 .settings-container {
     flex: 1;
