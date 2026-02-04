@@ -468,6 +468,11 @@ class App {
             // No need to call saveWorkout here - it would create a duplicate
             this.showWorkoutComplete();
         };
+
+        // Handle voice "end workout" command
+        workoutEngine.onWorkoutEnd = () => {
+            workoutEngine.completeWorkout();
+        };
     }
 
     /**

@@ -245,7 +245,16 @@ class WorkoutEngine {
     processInput(input) {
         const normalizedInput = input.toLowerCase().trim();
 
-        // Check for workout end commands
+        // Check for end workout command (explicitly ending the whole workout)
+        if (normalizedInput === 'end workout' || normalizedInput === 'finish workout' || normalizedInput === 'stop workout') {
+            this.sendAIMessage("Ending workout...");
+            if (this.onWorkoutEnd) {
+                this.onWorkoutEnd();
+            }
+            return;
+        }
+
+        // Check for set/exercise completion commands
         if (normalizedInput === 'done' || normalizedInput === 'end' || normalizedInput === 'finish') {
             return this.handleDone();
         }
