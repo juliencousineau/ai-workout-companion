@@ -221,6 +221,10 @@ class App {
         await userSettingsService.loadSettings();
         this.loadVoiceSettings();
 
+        // Reload phonetics for this user
+        await phoneticsService.load();
+        this.updatePhoneticsUI();
+
         // Reload saved credentials (now user-linked)
         const hasCredentials = await providerManager.loadSavedProvider();
         if (hasCredentials) {
