@@ -81,7 +81,8 @@ class App {
             phoneticsList: document.getElementById('phoneticsList'),
             phoneticAlternative: document.getElementById('phoneticAlternative'),
             phoneticCanonical: document.getElementById('phoneticCanonical'),
-            addPhoneticBtn: document.getElementById('addPhoneticBtn')
+            addPhoneticBtn: document.getElementById('addPhoneticBtn'),
+            resetPhoneticsBtn: document.getElementById('resetPhoneticsBtn')
         };
 
         this.isGuestMode = false;
@@ -435,6 +436,11 @@ class App {
         // Add phonetic button
         if (this.elements.addPhoneticBtn) {
             this.elements.addPhoneticBtn.addEventListener('click', () => this.addPhonetic());
+        }
+
+        // Reset phonetics button
+        if (this.elements.resetPhoneticsBtn) {
+            this.elements.resetPhoneticsBtn.addEventListener('click', () => this.resetPhonetics());
         }
 
         // App Settings footer link
@@ -824,6 +830,19 @@ class App {
      */
     async deletePhonetic(id) {
         const success = await phoneticsService.delete(id);
+        if (success) {
+            this.renderPhoneticsList();
+        }
+    }
+
+    /**
+     * Reset all phonetics to defaults
+     */
+    async resetPhonetics() {
+        if (!confirm('Reset all voice commands to defaults? This will remove any custom mappings.')) {
+            return;
+        }
+        const success = await phoneticsService.resetToDefaults();
         if (success) {
             this.renderPhoneticsList();
         }

@@ -107,6 +107,30 @@ class PhoneticsService {
         const commands = this.customPhonetics.filter(p => p.category === 'command');
         return { numbers, commands };
     }
+
+    /**
+     * Reset all phonetics to defaults
+     */
+    async resetToDefaults() {
+        if (!authService.isAuthenticated()) {
+            return false;
+        }
+
+        try {
+            const response = await fetch('/api/phonetics/reset', {
+                method: 'POST',
+                headers: authService.getAuthHeader()
+            });
+
+            if (response.ok) {
+                await this.load(); // Reload to get the defaults
+                return true;
+            }
+        } catch (error) {
+            console.error('Failed to reset phonetics:', error);
+        }
+        return false;
+    }
 }
 
 // Export singleton instance
