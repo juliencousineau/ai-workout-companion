@@ -12,6 +12,18 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
   <img src="docs/images/05-workout-complete.png" alt="Workout Complete" width="180" />
 </p>
 
+### Synced to Hevy
+
+<p align="center">
+  <img src="docs/images/06-hevy-synced.png" alt="Workout synced to Hevy" width="300" />
+</p>
+
+## Recommended Setup
+
+1. **Install [Hevy](https://hevy.com)** - Get the Pro lifetime subscription for API access
+2. **Use [ChatGPT](https://chat.openai.com) with [Hevy GPT](https://chatgpt.com/g/g-FI3v2GJpq-hevy-app-assistant)** - Build personalized routines with AI
+3. **Use AI Workout Companion** - Log and follow workouts in real-time with voice assist
+
 ## Features
 
 - **🎙️ Voice Interaction** - Speak naturally to log reps, skip exercises, or get guidance
