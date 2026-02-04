@@ -16,3 +16,4 @@ appsettings.*.json
 
 # macOS
 .DS_Store
+app.db
