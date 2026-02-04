@@ -15,7 +15,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 
 - **Backend**: .NET 10 with minimal APIs
 - **Frontend**: Vanilla JavaScript SPA
-- **Database**: SQLite with Entity Framework Core
+- **Database**: PostgreSQL with Entity Framework Core
 - **AI**: Google Gemini API for natural language understanding
 - **Styling**: Custom CSS with Aura Wellness design system
 
