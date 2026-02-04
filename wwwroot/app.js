@@ -74,7 +74,14 @@ class App {
             backFromAppSettingsBtn: document.getElementById('backFromAppSettingsBtn'),
             connectedProvidersList: document.getElementById('connectedProvidersList'),
             noProvidersMessage: document.getElementById('noProvidersMessage'),
-            connectNewProviderBtn: document.getElementById('connectNewProviderBtn')
+            connectNewProviderBtn: document.getElementById('connectNewProviderBtn'),
+
+            // Phonetics elements
+            phoneticsSection: document.getElementById('phoneticsSection'),
+            phoneticsList: document.getElementById('phoneticsList'),
+            phoneticAlternative: document.getElementById('phoneticAlternative'),
+            phoneticCanonical: document.getElementById('phoneticCanonical'),
+            addPhoneticBtn: document.getElementById('addPhoneticBtn')
         };
 
         this.isGuestMode = false;
@@ -103,6 +110,10 @@ class App {
         voiceService.reloadSettings();
         this.loadVoiceSettings();
         this.populateVoiceSelector();
+
+        // Load custom phonetics
+        await phoneticsService.load();
+        this.updatePhoneticsUI();
 
         // Check for saved provider credentials
         const hasCredentials = await providerManager.loadSavedProvider();
@@ -420,6 +431,11 @@ class App {
         this.elements.testVoiceBtn.addEventListener('click', () => {
             voiceService.speak('This is a test of your voice settings. How does it sound?');
         });
+
+        // Add phonetic button
+        if (this.elements.addPhoneticBtn) {
+            this.elements.addPhoneticBtn.addEventListener('click', () => this.addPhonetic());
+        }
 
         // App Settings footer link
         if (this.elements.appSettingsFooterLink) {
@@ -742,6 +758,75 @@ class App {
     showAppSettings() {
         this.showScreen('appSettings');
         this.renderConnectedProviders();
+    }
+
+    /**
+     * Update the phonetics UI in voice settings
+     */
+    updatePhoneticsUI() {
+        // Only show phonetics section for authenticated users
+        if (this.elements.phoneticsSection) {
+            if (authService.isAuthenticated()) {
+                this.elements.phoneticsSection.style.display = 'block';
+                this.renderPhoneticsList();
+            } else {
+                this.elements.phoneticsSection.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * Render the list of user's custom phonetics
+     */
+    renderPhoneticsList() {
+        if (!this.elements.phoneticsList) return;
+
+        const phonetics = phoneticsService.customPhonetics;
+
+        if (phonetics.length === 0) {
+            this.elements.phoneticsList.innerHTML = '<div class="phonetics-empty">No custom voice commands yet</div>';
+            return;
+        }
+
+        this.elements.phoneticsList.innerHTML = phonetics.map(p => `
+            <div class="phonetic-item" data-id="${p.id}">
+                <div class="phonetic-item-mapping">
+                    <span class="phonetic-item-alternative">"${p.alternative}"</span>
+                    <span class="phonetic-arrow">→</span>
+                    <span class="phonetic-item-canonical">${p.canonical}</span>
+                </div>
+                <button type="button" class="phonetic-delete-btn" onclick="app.deletePhonetic(${p.id})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Add a new phonetic mapping
+     */
+    async addPhonetic() {
+        const alternative = this.elements.phoneticAlternative?.value.trim();
+        const canonical = this.elements.phoneticCanonical?.value.trim();
+
+        if (!alternative || !canonical) {
+            return;
+        }
+
+        const success = await phoneticsService.add(canonical, alternative, 'number');
+        if (success) {
+            this.elements.phoneticAlternative.value = '';
+            this.elements.phoneticCanonical.value = '';
+            this.renderPhoneticsList();
+        }
+    }
+
+    /**
+     * Delete a phonetic mapping
+     */
+    async deletePhonetic(id) {
+        const success = await phoneticsService.delete(id);
+        if (success) {
+            this.renderPhoneticsList();
+        }
     }
 
     /**

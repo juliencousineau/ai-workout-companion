@@ -11,6 +11,7 @@ public class AppDbContext : DbContext, IDataProtectionKeyContext
     public DbSet<User> Users { get; set; }
     public DbSet<UserSetting> UserSettings { get; set; }
     public DbSet<UserCredential> UserCredentials { get; set; }
+    public DbSet<PhoneticMapping> PhoneticMappings { get; set; }
     
     // Data Protection Keys table for persistent key storage
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
@@ -65,6 +66,22 @@ public class AppDbContext : DbContext, IDataProtectionKeyContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             
             // Foreign key relationship to Users
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // PhoneticMapping entity
+        modelBuilder.Entity<PhoneticMapping>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.UserId, e.Alternative }).IsUnique();
+            entity.Property(e => e.Canonical).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Alternative).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)

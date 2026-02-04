@@ -343,7 +343,7 @@ class WorkoutEngine {
             'nine': '9', 'nein': '9', 'mine': '9',
 
             // Ten and above
-            'ten': '10', 'tin': '10',
+            'ten': '10', 'tin': '10', 'send': '10',
             'eleven': '11', 'leaven': '11',
             'twelve': '12', 'twelfth': '12',
             'thirteen': '13',
@@ -356,8 +356,14 @@ class WorkoutEngine {
             'twenty': '20'
         };
 
+        // Merge user's custom phonetics (they override built-in ones)
+        const customPhonetics = typeof phoneticsService !== 'undefined'
+            ? phoneticsService.getPhoneticMap()
+            : {};
+        const mergedMap = { ...wordToNumber, ...customPhonetics };
+
         let result = input;
-        for (const [word, num] of Object.entries(wordToNumber)) {
+        for (const [word, num] of Object.entries(mergedMap)) {
             // Replace whole words only (not partial matches)
             const regex = new RegExp(`\\b${word}\\b`, 'gi');
             result = result.replace(regex, num);
