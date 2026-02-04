@@ -18,6 +18,9 @@ builder.Services.AddControllers();
 
 // Add database - support Railway's DATABASE_URL or fall back to config
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"DEBUG: DATABASE_URL env var = '{databaseUrl ?? "(null)"}'");
+Console.WriteLine($"DEBUG: DATABASE_URL length = {databaseUrl?.Length ?? 0}");
+
 string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
