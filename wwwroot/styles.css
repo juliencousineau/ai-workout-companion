@@ -81,6 +81,8 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Add padding for fixed footer */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Typography Hierarchy */
@@ -160,7 +162,6 @@ button,
     flex-direction: column;
     background: var(--bg-secondary);
     position: relative;
-    overflow: hidden;
 }
 
 /* Header - Hidden */
@@ -168,15 +169,20 @@ button,
     display: none;
 }
 
-/* Footer Menu - Static (Not Sticky) */
+/* Footer Menu - Sticky at bottom */
 .footer {
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
-    max-width: 480px;
-    margin: var(--space-xl) auto 0;
-    padding: var(--space-lg) var(--space-md);
+    max-width: 100%;
+    padding: var(--space-md) var(--space-md);
+    /* iOS safe area support for home indicator */
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--stone-200);
-    background: transparent;
+    background: var(--stone-50);
+    z-index: 100;
 }
 
 .footer-content {
