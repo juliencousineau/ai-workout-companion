@@ -1000,8 +1000,10 @@ class App {
 
         this.elements.chatMessages.appendChild(messageDiv);
 
-        // Scroll to bottom - use scrollIntoView for better mobile support
-        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        // Scroll to bottom with delay to ensure DOM is updated
+        setTimeout(() => {
+            this.elements.chatMessages.scrollTop = this.elements.chatMessages.scrollHeight;
+        }, 50);
     }
 
     /**
