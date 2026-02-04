@@ -6,9 +6,12 @@ using AiWorkoutCompanion.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel to accept larger headers (for JWT auth tokens)
+// Configure Kestrel to accept larger headers and bind to Railway's PORT
+// Railway typically uses port 8080, or set PORT in your service settings
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
+    options.ListenAnyIP(int.Parse(port));
     options.Limits.MaxRequestHeadersTotalSize = 131072; // 128KB
     options.Limits.MaxRequestHeaderCount = 100;
 });
