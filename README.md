@@ -16,7 +16,6 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 - **Backend**: .NET 10 with minimal APIs
 - **Frontend**: Vanilla JavaScript SPA
 - **Database**: PostgreSQL with Entity Framework Core
-- **AI**: Google Gemini API for natural language understanding
 - **Styling**: Custom CSS with Aura Wellness design system
 
 ## Getting Started
@@ -25,7 +24,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Hevy Pro](https://hevy.com) subscription (for API access)
-- [Google AI Studio](https://aistudio.google.com/) API key
+- [PostgreSQL](https://www.postgresql.org/) database (for data storage)
 
 ### Installation
 
@@ -44,7 +43,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 
 4. Connect your Hevy API key from the Apps settings
 
-5. Connect your Google Gemini API key from the Apps settings
+
 
 ## Usage
 
@@ -75,7 +74,6 @@ Navigate to Voice settings to customize:
 
 Manage your integrations in the Apps settings:
 - Hevy API key for workout sync
-- Google Gemini API key for AI coaching
 
 ## Development
 
@@ -111,4 +109,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - [Hevy](https://hevy.com) for the workout tracking API
-- [Google Gemini](https://ai.google.dev/) for AI capabilities
