@@ -25,6 +25,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Hevy Pro](https://hevy.com) subscription (for API access)
 - [PostgreSQL](https://www.postgresql.org/) database (for data storage)
+- [Google Cloud Platform](https://console.cloud.google.com/) project with OAuth credentials configured
 
 ### Installation
 
