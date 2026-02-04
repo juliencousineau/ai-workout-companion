@@ -110,3 +110,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - [Hevy](https://hevy.com) for the workout tracking API
+
