@@ -949,6 +949,9 @@ class App {
         // Show chat screen
         this.showScreen('chat');
 
+        // Keep screen awake during workout
+        wakeLockService.acquire();
+
         // Start workout engine
         workoutEngine.startWorkout(this.selectedRoutine);
 
@@ -1054,6 +1057,9 @@ class App {
      * Show workout complete screen
      */
     showWorkoutComplete() {
+        // Release screen wake lock
+        wakeLockService.release();
+
         const summary = workoutEngine.getWorkoutSummary();
 
         if (summary) {
