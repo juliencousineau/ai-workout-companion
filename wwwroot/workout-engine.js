@@ -307,63 +307,41 @@ class WorkoutEngine {
 
     /**
      * Convert spoken word numbers to digits
-     * Includes phonetic near-matches for common speech recognition errors
+     * Uses phonetics from database (for authenticated users) or built-in fallback
      * e.g., "one" -> "1", "tree" -> "3"
      */
     convertWordsToNumbers(input) {
-        const wordToNumber = {
-            // Zero
+        // Built-in fallback for unauthenticated users
+        const builtinPhonetics = {
             'zero': '0', 'oh': '0',
-
-            // One
             'one': '1', 'won': '1', 'wan': '1',
-
-            // Two
             'two': '2', 'to': '2', 'too': '2', 'tu': '2',
-
-            // Three - common mishearing
             'three': '3', 'tree': '3', 'free': '3', 'thee': '3',
-
-            // Four
             'four': '4', 'for': '4', 'fore': '4', 'floor': '4',
-
-            // Five
             'five': '5', 'fife': '5', 'hive': '5',
-
-            // Six
-            'six': '6', 'sex': '6', 'sicks': '6',
-
-            // Seven
+            'six': '6', 'sicks': '6',
             'seven': '7', 'sven': '7',
-
-            // Eight
             'eight': '8', 'ate': '8', 'ait': '8',
-
-            // Nine
             'nine': '9', 'nein': '9', 'mine': '9',
-
-            // Ten and above
-            'ten': '10', 'tin': '10', 'send': '10',
+            'ten': '10', 'tin': '10',
             'eleven': '11', 'leaven': '11',
             'twelve': '12', 'twelfth': '12',
-            'thirteen': '13',
-            'fourteen': '14',
-            'fifteen': '15',
-            'sixteen': '16',
-            'seventeen': '17',
-            'eighteen': '18',
-            'nineteen': '19',
-            'twenty': '20'
+            'thirteen': '13', 'fourteen': '14', 'fifteen': '15',
+            'sixteen': '16', 'seventeen': '17', 'eighteen': '18',
+            'nineteen': '19', 'twenty': '20'
         };
 
-        // Merge user's custom phonetics (they override built-in ones)
-        const customPhonetics = typeof phoneticsService !== 'undefined'
+        // Use user's phonetics from database if available, else built-in fallback
+        const userPhonetics = typeof phoneticsService !== 'undefined' && phoneticsService.loaded
             ? phoneticsService.getPhoneticMap()
             : {};
-        const mergedMap = { ...wordToNumber, ...customPhonetics };
+
+        // User phonetics override built-in (or if user has database phonetics, use only those)
+        const hasUserPhonetics = Object.keys(userPhonetics).length > 0;
+        const phoneticMap = hasUserPhonetics ? userPhonetics : builtinPhonetics;
 
         let result = input;
-        for (const [word, num] of Object.entries(mergedMap)) {
+        for (const [word, num] of Object.entries(phoneticMap)) {
             // Replace whole words only (not partial matches)
             const regex = new RegExp(`\\b${word}\\b`, 'gi');
             result = result.replace(regex, num);
