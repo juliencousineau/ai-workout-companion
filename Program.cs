@@ -17,6 +17,18 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddControllers();
 
 // Add database - support Railway's PostgreSQL variables
+// Debug: Print all DB-related environment variables
+Console.WriteLine("=== Database Environment Variables ===");
+foreach (System.Collections.DictionaryEntry envVar in Environment.GetEnvironmentVariables())
+{
+    var key = envVar.Key?.ToString() ?? "";
+    if (key.Contains("PG") || key.Contains("DATABASE") || key.Contains("POSTGRES"))
+    {
+        Console.WriteLine($"  {key} = {(key.Contains("PASSWORD") ? "***" : envVar.Value)}");
+    }
+}
+Console.WriteLine("======================================");
+
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL") 
     ?? Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
 string connectionString;
