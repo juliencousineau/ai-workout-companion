@@ -1271,6 +1271,8 @@ button,
 .summary-stat {
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
     padding: var(--space-sm) 0;
     border-bottom: 1px solid rgba(28, 25, 23, 0.05);
 }
@@ -1281,10 +1283,15 @@ button,
 
 .summary-stat label {
     color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 .summary-stat value {
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 /* Loading State */
