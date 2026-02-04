@@ -990,9 +990,9 @@ button,
 }
 
 .routines-list {
-    flex: 1;
     overflow-y: auto;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
+    max-height: 50vh;
 }
 
 .routine-item {
