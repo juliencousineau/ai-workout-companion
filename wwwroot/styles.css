@@ -845,20 +845,10 @@ button,
     color: var(--text-primary);
 }
 
-.setup-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(28, 25, 23, 0.05);
-    margin-top: var(--space-md);
-    overflow: hidden;
-}
-
 .setup-icon {
     font-size: 4rem;
     margin-bottom: var(--space-lg);
+    text-align: center;
     animation: bounce 2s infinite;
 }
 
@@ -874,14 +864,8 @@ button,
     }
 }
 
-.setup-card h2 {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-sm);
-}
-
-.setup-card p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-md);
+.api-form-content {
+    margin-top: var(--space-lg);
 }
 
 .hevy-link {
