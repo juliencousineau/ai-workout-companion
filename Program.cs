@@ -6,9 +6,11 @@ using AiWorkoutCompanion.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel to accept larger headers (for JWT auth tokens)
+// Configure Kestrel to accept larger headers and bind to Railway's PORT
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 builder.WebHost.ConfigureKestrel(options =>
 {
+    options.ListenAnyIP(int.Parse(port));
     options.Limits.MaxRequestHeadersTotalSize = 131072; // 128KB
     options.Limits.MaxRequestHeaderCount = 100;
 });
@@ -18,6 +20,9 @@ builder.Services.AddControllers();
 
 // Add database - support Railway's DATABASE_URL or fall back to config
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"DEBUG: DATABASE_URL env var = '{databaseUrl ?? "(null)"}'");
+Console.WriteLine($"DEBUG: DATABASE_URL length = {databaseUrl?.Length ?? 0}");
+
 string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
