@@ -16,11 +16,28 @@ builder.WebHost.ConfigureKestrel(options =>
 // Add services
 builder.Services.AddControllers();
 
-// Add database
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=localhost;Database=workout_companion;Username=postgres;Password=postgres";
+// Add database - support Railway's DATABASE_URL or fall back to config
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+string connectionString;
+
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    // Parse Railway's PostgreSQL URL format: postgres://user:password@host:port/database
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+    Console.WriteLine($"Using DATABASE_URL: Host={uri.Host}, Database={uri.AbsolutePath.TrimStart('/')}");
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? "Host=localhost;Database=workout_companion;Username=postgres;Password=postgres";
+    Console.WriteLine("Using local database connection");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions => 
+        npgsqlOptions.EnableRetryOnFailure(3)));
 
 // Add data protection for encryption
 builder.Services.AddDataProtection();
