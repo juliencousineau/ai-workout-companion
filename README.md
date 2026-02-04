@@ -13,7 +13,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 
 ## Tech Stack
 
-- **Backend**: .NET 8 with minimal APIs
+- **Backend**: .NET 10 with minimal APIs
 - **Frontend**: Vanilla JavaScript SPA
 - **Database**: SQLite with Entity Framework Core
 - **AI**: Google Gemini API for natural language understanding
@@ -23,7 +23,7 @@ An AI-powered workout companion that integrates with the Hevy fitness app to gui
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Hevy Pro](https://hevy.com) subscription (for API access)
 - [Google AI Studio](https://aistudio.google.com/) API key
 
