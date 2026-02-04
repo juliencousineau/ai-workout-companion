@@ -2,6 +2,16 @@
 
 An AI-powered workout companion that integrates with the Hevy fitness app to guide you through your workouts with voice interaction and real-time feedback.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/01-choose-app.png" alt="Choose App" width="180" />
+  <img src="docs/images/02-select-routine.png" alt="Select Routine" width="180" />
+  <img src="docs/images/04-workout-chat.png" alt="Workout Chat" width="180" />
+  <img src="docs/images/03-workout-progress.png" alt="Workout Progress" width="180" />
+  <img src="docs/images/05-workout-complete.png" alt="Workout Complete" width="180" />
+</p>
+
 ## Features
 
 - **🎙️ Voice Interaction** - Speak naturally to log reps, skip exercises, or get guidance
