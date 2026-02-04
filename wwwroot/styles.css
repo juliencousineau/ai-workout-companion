@@ -493,6 +493,8 @@ button,
     display: flex;
     flex-direction: column;
     position: relative;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Screens */
@@ -845,20 +847,10 @@ button,
     color: var(--text-primary);
 }
 
-.setup-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(28, 25, 23, 0.05);
-    margin-top: var(--space-md);
-    overflow: hidden;
-}
-
 .setup-icon {
     font-size: 4rem;
     margin-bottom: var(--space-lg);
+    text-align: center;
     animation: bounce 2s infinite;
 }
 
@@ -874,14 +866,8 @@ button,
     }
 }
 
-.setup-card h2 {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-sm);
-}
-
-.setup-card p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-md);
+.api-form-content {
+    margin-top: var(--space-lg);
 }
 
 .hevy-link {
@@ -1036,20 +1022,21 @@ button,
     padding: 0;
 }
 
-.chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+#chatScreen.active {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: calc(100vh - 80px);
+    flex: none;
 }
 
 .workout-header {
     background: var(--bg-card);
-    padding: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(28, 25, 23, 0.05);
+    flex-shrink: 0;
 }
 
 .workout-info h3 {
@@ -1113,7 +1100,9 @@ button,
 /* Chat Messages */
 .chat-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: var(--space-md);
     display: flex;
     flex-direction: column;
@@ -1190,6 +1179,7 @@ button,
     padding: var(--space-md);
     background: var(--bg-card);
     border-top: 1px solid rgba(28, 25, 23, 0.05);
+    flex-shrink: 0;
 }
 
 .chat-input {
@@ -1287,6 +1277,8 @@ button,
 .summary-stat {
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
     padding: var(--space-sm) 0;
     border-bottom: 1px solid rgba(28, 25, 23, 0.05);
 }
@@ -1297,10 +1289,15 @@ button,
 
 .summary-stat label {
     color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 .summary-stat value {
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 /* Loading State */

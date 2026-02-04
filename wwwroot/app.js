@@ -1000,8 +1000,10 @@ class App {
 
         this.elements.chatMessages.appendChild(messageDiv);
 
-        // Scroll to bottom
-        this.elements.chatMessages.scrollTop = this.elements.chatMessages.scrollHeight;
+        // Scroll to bottom with delay to ensure DOM is updated
+        setTimeout(() => {
+            this.elements.chatMessages.scrollTop = this.elements.chatMessages.scrollHeight;
+        }, 50);
     }
 
     /**

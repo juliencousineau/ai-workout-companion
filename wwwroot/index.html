@@ -106,20 +106,30 @@
 
                 <!-- Connection Form View -->
                 <div id="connectionFormView" class="setup-view" style="display: none;">
-                    <button id="backToProvidersBtn" class="btn-back">← Back</button>
-                    <div class="setup-card">
+                    <div class="settings-container">
+                        <button id="backToProvidersBtn" class="btn-back">← Back</button>
+
                         <div class="setup-icon" id="providerFormIcon">🔑</div>
-                        <h2 id="providerFormTitle">Connect to Hevy</h2>
-                        <p id="providerFormDescription">Enter your Hevy API key to get started. You can find it at:</p>
+
+                        <header class="settings-header">
+                            <h2 class="settings-title">Connect to <em id="providerFormTitleEm">Hevy</em></h2>
+                            <p class="settings-subtitle" id="providerFormDescription">Enter your Hevy API key to get
+                                started. You can find it at:</p>
+                        </header>
+
                         <a href="https://hevy.com/settings?developer" target="_blank" class="hevy-link"
                             id="providerFormLink">
                             hevy.com/settings → Developer
                         </a>
-                        <div class="input-group">
-                            <input type="password" id="apiKeyInput" placeholder="Enter your API key" class="api-input">
-                            <button id="connectBtn" class="btn btn-primary">Connect</button>
+
+                        <div class="api-form-content">
+                            <div class="input-group">
+                                <input type="password" id="apiKeyInput" placeholder="Enter your API key"
+                                    class="api-input">
+                                <button id="connectBtn" class="btn btn-primary btn-large">Connect</button>
+                            </div>
+                            <p class="note" id="providerFormNote">Requires Hevy Pro subscription</p>
                         </div>
-                        <p class="note" id="providerFormNote">Requires Hevy Pro subscription</p>
                     </div>
                 </div>
             </div>
@@ -212,48 +222,46 @@
 
             <!-- Chat Screen -->
             <div id="chatScreen" class="screen">
-                <div class="chat-container">
-                    <!-- Workout Progress Header -->
-                    <div class="workout-header" id="workoutHeader">
-                        <div class="workout-info">
-                            <h3 id="workoutTitle">Push Day</h3>
-                            <span id="exerciseProgress">Exercise 1/5</span>
-                        </div>
-                        <div class="end-workout-actions" id="endWorkoutActions">
-                            <button id="endWorkoutBtn" class="btn btn-danger btn-small">End Workout</button>
-                            <div id="endWorkoutConfirm" class="inline-confirm" style="display: none;">
-                                <span class="confirm-text">End workout?</span>
-                                <button id="endWorkoutCancel" class="btn-action btn-action-secondary">Cancel</button>
-                                <button id="endWorkoutConfirmBtn" class="btn-action btn-action-danger">End</button>
-                            </div>
+                <!-- Workout Progress Header -->
+                <div class="workout-header" id="workoutHeader">
+                    <div class="workout-info">
+                        <h3 id="workoutTitle">Push Day</h3>
+                        <span id="exerciseProgress">Exercise 1/5</span>
+                    </div>
+                    <div class="end-workout-actions" id="endWorkoutActions">
+                        <button id="endWorkoutBtn" class="btn btn-danger btn-small">End Workout</button>
+                        <div id="endWorkoutConfirm" class="inline-confirm" style="display: none;">
+                            <span class="confirm-text">End workout?</span>
+                            <button id="endWorkoutCancel" class="btn-action btn-action-secondary">Cancel</button>
+                            <button id="endWorkoutConfirmBtn" class="btn-action btn-action-danger">End</button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Chat Messages -->
-                    <div class="chat-messages" id="chatMessages">
-                        <!-- Messages will be added here -->
-                    </div>
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be added here -->
+                </div>
 
-                    <!-- Chat Input -->
-                    <div class="chat-input-container">
-                        <button id="voiceBtn" class="btn btn-voice" title="Voice input">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                                <line x1="12" y1="19" x2="12" y2="23" />
-                                <line x1="8" y1="23" x2="16" y2="23" />
-                            </svg>
-                        </button>
-                        <input type="text" id="chatInput" placeholder="Type a number, 'done', or message..."
-                            class="chat-input">
-                        <button id="sendBtn" class="btn btn-primary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                            </svg>
-                        </button>
-                    </div>
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <button id="voiceBtn" class="btn btn-voice" title="Voice input">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                            <line x1="12" y1="19" x2="12" y2="23" />
+                            <line x1="8" y1="23" x2="16" y2="23" />
+                        </svg>
+                    </button>
+                    <input type="text" id="chatInput" placeholder="Type a number, 'done', or message..."
+                        class="chat-input">
+                    <button id="sendBtn" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
 

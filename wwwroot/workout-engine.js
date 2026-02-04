@@ -637,9 +637,10 @@ class WorkoutEngine {
             this.restTimerInterval = null;
         }
 
-        // Stop any ongoing voice announcements
+        // Stop any ongoing voice announcements and listening
         if (typeof voiceService !== 'undefined') {
             voiceService.stopSpeaking();
+            voiceService.stopListening();
         }
 
         this.workoutData.end_time = new Date().toISOString();
